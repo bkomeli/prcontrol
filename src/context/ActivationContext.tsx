@@ -27,6 +27,7 @@ function mapRow(row: any): Activation {
     status: row.status as ActivationStatus,
     equipe: row.equipe as Team | undefined,
     responsavel: row.responsavel ?? undefined,
+    urgente: row.urgente ?? false,
     criadoEm: row.criado_em,
     atualizadoEm: row.atualizado_em,
   };
@@ -35,30 +36,39 @@ function mapRow(row: any): Activation {
 export function ActivationProvider({ children }: { children: React.ReactNode }) {
   const [activations, setActivations] = useState<Activation[]>([]);
 
-  // Initial fetch
-  useEffect(() => {
-    const fetch = async () => {
-      const { data } = await supabase
-        .from("activations")
-        .select("*")
-        .order("criado_em", { ascending: false });
-      if (data) setActivations(data.map(mapRow));
-    };
-    fetch();
+  const fetchAll = useCallback(async () => {
+    const { data } = await supabase
+      .from("activations")
+      .select("*")
+      .order("criado_em", { ascending: false });
+    if (data) setActivations(data.map(mapRow));
+  }, []);
 
-    // Realtime subscription
+  useEffect(() => {
+    fetchAll();
+
     const channel = supabase
       .channel("activations-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "activations" }, () => {
-        // Re-fetch on any change for simplicity
-        fetch();
+        fetchAll();
       })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, []);
+  }, [fetchAll]);
 
   const addActivation = useCallback(async (data: Omit<Activation, "id" | "status" | "criadoEm" | "atualizadoEm">) => {
+    const now = new Date().toISOString();
+    const optimistic: Activation = {
+      ...data,
+      id: crypto.randomUUID(),
+      status: "Aguardando equipe",
+      criadoEm: now,
+      atualizadoEm: now,
+    };
+    // Optimistic insert
+    setActivations((prev) => [optimistic, ...prev]);
+
     await supabase.from("activations").insert({
       sm: data.sm,
       transportador: data.transportador,
@@ -69,14 +79,17 @@ export function ActivationProvider({ children }: { children: React.ReactNode }) 
       motivo: data.motivo,
       autorizado_por: data.autorizadoPor,
       resumo: data.resumo,
+      urgente: data.urgente,
     });
   }, []);
 
   const updateStatus = useCallback(async (id: string, status: ActivationStatus) => {
+    setActivations((prev) => prev.map((a) => a.id === id ? { ...a, status, atualizadoEm: new Date().toISOString() } : a));
     await supabase.from("activations").update({ status }).eq("id", id);
   }, []);
 
   const assignTeam = useCallback(async (id: string, equipe: Team, responsavel: string) => {
+    setActivations((prev) => prev.map((a) => a.id === id ? { ...a, equipe, responsavel, status: "Em deslocamento" as ActivationStatus, atualizadoEm: new Date().toISOString() } : a));
     await supabase.from("activations").update({
       equipe,
       responsavel,
@@ -85,6 +98,7 @@ export function ActivationProvider({ children }: { children: React.ReactNode }) 
   }, []);
 
   const updateActivation = useCallback(async (id: string, updates: Partial<Activation>) => {
+    setActivations((prev) => prev.map((a) => a.id === id ? { ...a, ...updates, atualizadoEm: new Date().toISOString() } : a));
     const dbUpdates: Record<string, any> = {};
     if (updates.status) dbUpdates.status = updates.status;
     if (updates.equipe) dbUpdates.equipe = updates.equipe;

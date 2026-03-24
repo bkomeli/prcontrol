@@ -23,6 +23,7 @@ export interface Activation {
   status: ActivationStatus;
   equipe?: Team;
   responsavel?: string;
+  urgente: boolean;
   criadoEm: string;
   atualizadoEm: string;
 }
