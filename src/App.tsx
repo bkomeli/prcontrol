@@ -18,7 +18,19 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AppContent />
+        <ActivationProvider>
+          <div className="min-h-screen flex flex-col w-full">
+            <TopNav />
+            <main className="flex-1 overflow-auto">
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/pr-ativas" element={<PrAtivas />} />
+                <Route path="/historico" element={<Historico />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </main>
+          </div>
+        </ActivationProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

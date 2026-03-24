@@ -44,7 +44,7 @@ export function ActivationCard({ activation, showQuickActions = false }: { activ
         <div className="flex items-start justify-between mb-2">
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="text-xs text-muted-foreground font-mono">SM</span>
+              <span className="text-xs text-muted-foreground font-mono">Placa</span>
               {activation.urgente && (
                 <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
                   <AlertTriangle className="h-2.5 w-2.5 mr-0.5" />
@@ -52,7 +52,7 @@ export function ActivationCard({ activation, showQuickActions = false }: { activ
                 </Badge>
               )}
             </div>
-            <p className="text-sm font-semibold text-foreground">{activation.sm}</p>
+            <p className="text-sm font-semibold text-foreground">{activation.cavalo}{activation.carreta ? ` / ${activation.carreta}` : ""}</p>
           </div>
           <div className="flex flex-col items-end gap-1">
             <StatusBadge status={activation.status} />

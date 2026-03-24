@@ -23,6 +23,24 @@ export default function PrAtivas() {
     });
   }, [activations, filterDate]);
 
+  const statusLabel = (s: string) => {
+    if (s === "Aguardando equipe") return "Cotando";
+    return s;
+  };
+
+  const copyScript = useCallback(() => {
+    const lines = [`PRs ATIVAS | ${active.length}`, ""];
+    active.forEach((a, i) => {
+      lines.push(`Placa: ${a.cavalo}${a.carreta ? ` / ${a.carreta}` : ""}`);
+      lines.push(`Equipe: ${a.equipe || ""}`);
+      lines.push(`Status: ${statusLabel(a.status)}`);
+      lines.push(`Motivo: ${a.motivo}`);
+      if (i < active.length - 1) lines.push("", "--------------------", "");
+    });
+    navigator.clipboard.writeText(lines.join("\n"));
+    toast.success("Script das PRs ativas copiado!");
+  }, [active]);
+
   return (
     <div className="p-6">
       <div className="flex items-center gap-3 mb-6">
@@ -33,7 +51,13 @@ export default function PrAtivas() {
             {active.length}
           </span>
         </h1>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          {active.length > 0 && (
+            <Button variant="outline" size="sm" className="h-9 text-xs gap-1" onClick={copyScript}>
+              <Copy className="h-3.5 w-3.5" />
+              Copiar PRs Ativas
+            </Button>
+          )}
           <DateFilter date={filterDate} onChange={setFilterDate} />
         </div>
       </div>

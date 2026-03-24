@@ -180,6 +180,11 @@ export default function Historico() {
                   className="cursor-pointer hover:bg-muted/30"
                   onClick={() => setSelected(a)}
                 >
+                  {selectMode && (
+                    <TableCell className="px-2" onClick={(e) => e.stopPropagation()}>
+                      <Checkbox checked={selectedIds.has(a.id)} onCheckedChange={() => toggleSelect(a.id)} />
+                    </TableCell>
+                  )}
                   <TableCell className="px-2">
                     {a.urgente && <AlertTriangle className="h-3.5 w-3.5 text-destructive" />}
                   </TableCell>
