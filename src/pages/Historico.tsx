@@ -1,28 +1,34 @@
 import { useState, useMemo } from "react";
 import { useActivations } from "@/context/ActivationContext";
 import { StatusBadge } from "@/components/StatusBadge";
+import { QuickActions } from "@/components/QuickActions";
+import { DetailModal } from "@/components/DetailModal";
+import { DateFilter } from "@/components/DateFilter";
 import { STATUS_LIST, TEAMS } from "@/types/activation";
-import type { ActivationStatus, Team } from "@/types/activation";
+import type { Activation, ActivationStatus } from "@/types/activation";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { History, Save, Search } from "lucide-react";
-import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { History, Search, AlertTriangle } from "lucide-react";
 
 export default function Historico() {
-  const { activations, updateActivation } = useActivations();
-  const [editId, setEditId] = useState<string | null>(null);
-  const [editData, setEditData] = useState<{ status: ActivationStatus; equipe: Team | ""; responsavel: string }>({
-    status: "Aguardando equipe", equipe: "", responsavel: "",
-  });
-
+  const { activations } = useActivations();
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterEquipe, setFilterEquipe] = useState<string>("all");
+  const [filterDate, setFilterDate] = useState(new Date());
+  const [selected, setSelected] = useState<Activation | null>(null);
 
   const filtered = useMemo(() => {
+    const dayStart = new Date(filterDate);
+    dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(filterDate);
+    dayEnd.setHours(23, 59, 59, 999);
+
     return activations.filter((a) => {
+      const d = new Date(a.criadoEm);
+      if (d < dayStart || d > dayEnd) return false;
       if (filterStatus !== "all" && a.status !== filterStatus) return false;
       if (filterEquipe !== "all" && a.equipe !== filterEquipe) return false;
       if (search) {
@@ -36,27 +42,11 @@ export default function Historico() {
       }
       return true;
     });
-  }, [activations, search, filterStatus, filterEquipe]);
+  }, [activations, search, filterStatus, filterEquipe, filterDate]);
 
-  const startEdit = (a: typeof activations[0]) => {
-    setEditId(a.id);
-    setEditData({ status: a.status, equipe: a.equipe || "", responsavel: a.responsavel || "" });
-  };
-
-  const saveEdit = () => {
-    if (!editId) return;
-    updateActivation(editId, {
-      status: editData.status,
-      equipe: editData.equipe as Team || undefined,
-      responsavel: editData.responsavel || undefined,
-    });
-    setEditId(null);
-    toast.success("Registro atualizado");
-  };
-
-  const formatDate = (iso: string) => {
+  const formatTime = (iso: string) => {
     const d = new Date(iso);
-    return d.toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit" });
+    return d.toLocaleString("pt-BR", { hour: "2-digit", minute: "2-digit" });
   };
 
   return (
@@ -94,24 +84,26 @@ export default function Historico() {
             {TEAMS.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
           </SelectContent>
         </Select>
+        <DateFilter date={filterDate} onChange={setFilterDate} />
       </div>
 
       <div className="rounded-lg border border-border overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
-              <TableHead className="text-xs">SM</TableHead>
-              <TableHead className="text-xs">Equipe</TableHead>
-              <TableHead className="text-xs">Responsável</TableHead>
+              <TableHead className="text-xs w-8"></TableHead>
+              <TableHead className="text-xs">Placa</TableHead>
+              <TableHead className="text-xs">Transportadora</TableHead>
+              <TableHead className="text-xs">Motivo</TableHead>
               <TableHead className="text-xs">Status</TableHead>
-              <TableHead className="text-xs">Data/Hora</TableHead>
-              <TableHead className="text-xs w-20">Ações</TableHead>
+              <TableHead className="text-xs">Hora</TableHead>
+              <TableHead className="text-xs">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                   Nenhum registro encontrado
                 </TableCell>
               </TableRow>
@@ -120,60 +112,21 @@ export default function Historico() {
                 <TableRow
                   key={a.id}
                   className="cursor-pointer hover:bg-muted/30"
-                  onClick={() => editId !== a.id && startEdit(a)}
+                  onClick={() => setSelected(a)}
                 >
-                  <TableCell className="text-sm font-mono font-medium">{a.sm}</TableCell>
-                  <TableCell className="text-sm">
-                    {editId === a.id ? (
-                      <Select value={editData.equipe} onValueChange={(v) => setEditData((p) => ({ ...p, equipe: v as Team }))}>
-                        <SelectTrigger className="h-7 text-xs w-28" onClick={(e) => e.stopPropagation()}>
-                          <SelectValue placeholder="Equipe" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {TEAMS.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      a.equipe || "—"
-                    )}
+                  <TableCell className="px-2">
+                    {a.urgente && <AlertTriangle className="h-3.5 w-3.5 text-destructive" />}
                   </TableCell>
-                  <TableCell className="text-sm">
-                    {editId === a.id ? (
-                      <Input
-                        value={editData.responsavel}
-                        onChange={(e) => setEditData((p) => ({ ...p, responsavel: e.target.value }))}
-                        className="h-7 text-xs w-32"
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    ) : (
-                      a.responsavel || "—"
-                    )}
+                  <TableCell className="text-sm font-mono">
+                    {a.cavalo}{a.carreta ? ` / ${a.carreta}` : ""}
                   </TableCell>
-                  <TableCell>
-                    {editId === a.id ? (
-                      <Select value={editData.status} onValueChange={(v) => setEditData((p) => ({ ...p, status: v as ActivationStatus }))}>
-                        <SelectTrigger className="h-7 text-xs w-36" onClick={(e) => e.stopPropagation()}>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {STATUS_LIST.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <StatusBadge status={a.status} />
-                    )}
-                  </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{formatDate(a.atualizadoEm)}</TableCell>
-                  <TableCell>
-                    {editId === a.id && (
-                      <Button
-                        size="sm"
-                        className="h-7 text-xs"
-                        onClick={(e) => { e.stopPropagation(); saveEdit(); }}
-                      >
-                        <Save className="h-3 w-3 mr-1" />
-                        Salvar
-                      </Button>
+                  <TableCell className="text-sm">{a.transportador}</TableCell>
+                  <TableCell className="text-sm max-w-[200px] truncate">{a.motivo}</TableCell>
+                  <TableCell><StatusBadge status={a.status} /></TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{formatTime(a.criadoEm)}</TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    {a.status !== "Finalizado" && a.status !== "Cancelado" && (
+                      <QuickActions activation={a} />
                     )}
                   </TableCell>
                 </TableRow>
@@ -182,6 +135,8 @@ export default function Historico() {
           </TableBody>
         </Table>
       </div>
+
+      <DetailModal activation={selected} open={!!selected} onOpenChange={(o) => !o && setSelected(null)} />
     </div>
   );
 }
