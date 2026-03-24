@@ -1,8 +1,10 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useActivations } from "@/context/ActivationContext";
 import { ActivationCard } from "@/components/ActivationCard";
 import { DateFilter } from "@/components/DateFilter";
-import { Shield } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Shield, Copy } from "lucide-react";
+import { toast } from "sonner";
 
 export default function PrAtivas() {
   const { activations } = useActivations();
