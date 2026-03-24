@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useActivations } from "@/context/ActivationContext";
 import { StatusBadge } from "@/components/StatusBadge";
 import { STATUS_LIST, TEAMS } from "@/types/activation";
@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { History, Save } from "lucide-react";
+import { History, Save, Search } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Historico() {
@@ -16,6 +16,27 @@ export default function Historico() {
   const [editData, setEditData] = useState<{ status: ActivationStatus; equipe: Team | ""; responsavel: string }>({
     status: "Aguardando equipe", equipe: "", responsavel: "",
   });
+
+  const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [filterEquipe, setFilterEquipe] = useState<string>("all");
+
+  const filtered = useMemo(() => {
+    return activations.filter((a) => {
+      if (filterStatus !== "all" && a.status !== filterStatus) return false;
+      if (filterEquipe !== "all" && a.equipe !== filterEquipe) return false;
+      if (search) {
+        const q = search.toLowerCase();
+        const match =
+          a.sm.toLowerCase().includes(q) ||
+          a.cavalo.toLowerCase().includes(q) ||
+          a.carreta.toLowerCase().includes(q) ||
+          a.transportador.toLowerCase().includes(q);
+        if (!match) return false;
+      }
+      return true;
+    });
+  }, [activations, search, filterStatus, filterEquipe]);
 
   const startEdit = (a: typeof activations[0]) => {
     setEditId(a.id);
@@ -45,6 +66,36 @@ export default function Historico() {
         Histórico
       </h1>
 
+      <div className="flex flex-wrap items-center gap-3 mb-4">
+        <div className="relative flex-1 min-w-[200px] max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar SM, placa, transportador..."
+            className="pl-9 h-9 text-sm"
+          />
+        </div>
+        <Select value={filterStatus} onValueChange={setFilterStatus}>
+          <SelectTrigger className="h-9 w-44 text-sm">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os status</SelectItem>
+            {STATUS_LIST.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={filterEquipe} onValueChange={setFilterEquipe}>
+          <SelectTrigger className="h-9 w-40 text-sm">
+            <SelectValue placeholder="Equipe" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas equipes</SelectItem>
+            {TEAMS.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="rounded-lg border border-border overflow-hidden">
         <Table>
           <TableHeader>
@@ -58,14 +109,14 @@ export default function Historico() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {activations.length === 0 ? (
+            {filtered.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                  Nenhum registro
+                  Nenhum registro encontrado
                 </TableCell>
               </TableRow>
             ) : (
-              activations.map((a) => (
+              filtered.map((a) => (
                 <TableRow
                   key={a.id}
                   className="cursor-pointer hover:bg-muted/30"

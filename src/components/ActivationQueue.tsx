@@ -6,7 +6,7 @@ import { Radio } from "lucide-react";
 export function ActivationQueue() {
   const { activations } = useActivations();
   const active = activations.filter(
-    (a) => a.status !== "Finalizado" && a.status !== "Cancelado"
+    (a) => a.status === "Aguardando equipe"
   );
 
   return (
