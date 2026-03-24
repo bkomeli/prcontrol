@@ -9,8 +9,10 @@ import type { Activation, ActivationStatus } from "@/types/activation";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { History, Search, AlertTriangle } from "lucide-react";
+import { History, Search, AlertTriangle, EyeOff, Eye, CheckSquare } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function Historico() {
   const { activations } = useActivations();
@@ -19,6 +21,9 @@ export default function Historico() {
   const [filterEquipe, setFilterEquipe] = useState<string>("all");
   const [filterDate, setFilterDate] = useState(new Date());
   const [selected, setSelected] = useState<Activation | null>(null);
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const filtered = useMemo(() => {
     const dayStart = new Date(filterDate);
@@ -40,9 +45,40 @@ export default function Historico() {
           a.transportador.toLowerCase().includes(q);
         if (!match) return false;
       }
+      if (hiddenIds.has(a.id)) return false;
       return true;
     });
-  }, [activations, search, filterStatus, filterEquipe, filterDate]);
+  }, [activations, search, filterStatus, filterEquipe, filterDate, hiddenIds]);
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const selectAll = () => {
+    if (selectedIds.size === filtered.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filtered.map((a) => a.id)));
+    }
+  };
+
+  const hideSelected = () => {
+    setHiddenIds((prev) => {
+      const next = new Set(prev);
+      selectedIds.forEach((id) => next.add(id));
+      return next;
+    });
+    setSelectedIds(new Set());
+    setSelectMode(false);
+  };
+
+  const showAll = () => {
+    setHiddenIds(new Set());
+  };
 
   const formatTime = (iso: string) => {
     const d = new Date(iso);
@@ -85,12 +121,43 @@ export default function Historico() {
           </SelectContent>
         </Select>
         <DateFilter date={filterDate} onChange={setFilterDate} />
+        {hiddenIds.size > 0 && (
+          <Button variant="outline" size="sm" className="h-9 text-xs gap-1" onClick={showAll}>
+            <Eye className="h-3.5 w-3.5" />
+            Mostrar ocultos ({hiddenIds.size})
+          </Button>
+        )}
+        <Button
+          variant={selectMode ? "default" : "outline"}
+          size="sm"
+          className="h-9 text-xs gap-1"
+          onClick={() => { setSelectMode(!selectMode); setSelectedIds(new Set()); }}
+        >
+          <EyeOff className="h-3.5 w-3.5" />
+          Ocultar
+        </Button>
       </div>
+
+      {selectMode && (
+        <div className="flex items-center gap-3 mb-3">
+          <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={selectAll}>
+            <CheckSquare className="h-3 w-3" />
+            {selectedIds.size === filtered.length ? "Desmarcar todos" : "Selecionar todos"}
+          </Button>
+          {selectedIds.size > 0 && (
+            <Button variant="destructive" size="sm" className="h-7 text-xs gap-1" onClick={hideSelected}>
+              <EyeOff className="h-3 w-3" />
+              Ocultar selecionados ({selectedIds.size})
+            </Button>
+          )}
+        </div>
+      )}
 
       <div className="rounded-lg border border-border overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
+              {selectMode && <TableHead className="text-xs w-8"></TableHead>}
               <TableHead className="text-xs w-8"></TableHead>
               <TableHead className="text-xs">Placa</TableHead>
               <TableHead className="text-xs">Transportadora</TableHead>
@@ -103,7 +170,7 @@ export default function Historico() {
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                <TableCell colSpan={selectMode ? 8 : 7} className="text-center text-muted-foreground py-8">
                   Nenhum registro encontrado
                 </TableCell>
               </TableRow>
@@ -114,6 +181,11 @@ export default function Historico() {
                   className="cursor-pointer hover:bg-muted/30"
                   onClick={() => setSelected(a)}
                 >
+                  {selectMode && (
+                    <TableCell className="px-2" onClick={(e) => e.stopPropagation()}>
+                      <Checkbox checked={selectedIds.has(a.id)} onCheckedChange={() => toggleSelect(a.id)} />
+                    </TableCell>
+                  )}
                   <TableCell className="px-2">
                     {a.urgente && <AlertTriangle className="h-3.5 w-3.5 text-destructive" />}
                   </TableCell>
