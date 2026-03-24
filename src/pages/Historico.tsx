@@ -10,7 +10,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { History, Search, AlertTriangle } from "lucide-react";
+import { History, Search, AlertTriangle, EyeOff, Eye, CheckSquare } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function Historico() {
   const { activations } = useActivations();
@@ -19,6 +20,9 @@ export default function Historico() {
   const [filterEquipe, setFilterEquipe] = useState<string>("all");
   const [filterDate, setFilterDate] = useState(new Date());
   const [selected, setSelected] = useState<Activation | null>(null);
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const filtered = useMemo(() => {
     const dayStart = new Date(filterDate);
