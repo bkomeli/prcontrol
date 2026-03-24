@@ -1,5 +1,6 @@
-import { LayoutDashboard, Siren, History } from "lucide-react";
+import { LayoutDashboard, Siren, History, LogOut } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
+import { Button } from "@/components/ui/button";
 
 const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
@@ -7,7 +8,7 @@ const items = [
   { title: "Histórico", url: "/historico", icon: History },
 ];
 
-export function TopNav() {
+export function TopNav({ onSignOut }: { onSignOut: () => void }) {
   return (
     <nav className="h-14 bg-card border-b border-border flex items-center px-6 shrink-0">
       <h1 className="text-base font-bold tracking-tight mr-8">
@@ -28,7 +29,12 @@ export function TopNav() {
           </NavLink>
         ))}
       </div>
-      <span className="ml-auto text-xs text-muted-foreground">Pronta Resposta Logística</span>
+      <div className="ml-auto flex items-center gap-3">
+        <span className="text-xs text-muted-foreground">Pronta Resposta Logística</span>
+        <Button variant="ghost" size="sm" onClick={onSignOut} className="text-muted-foreground hover:text-destructive">
+          <LogOut className="h-4 w-4" />
+        </Button>
+      </div>
     </nav>
   );
 }
