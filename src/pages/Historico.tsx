@@ -120,7 +120,37 @@ export default function Historico() {
           </SelectContent>
         </Select>
         <DateFilter date={filterDate} onChange={setFilterDate} />
+        {hiddenIds.size > 0 && (
+          <Button variant="outline" size="sm" className="h-9 text-xs gap-1" onClick={showAll}>
+            <Eye className="h-3.5 w-3.5" />
+            Mostrar ocultos ({hiddenIds.size})
+          </Button>
+        )}
+        <Button
+          variant={selectMode ? "default" : "outline"}
+          size="sm"
+          className="h-9 text-xs gap-1"
+          onClick={() => { setSelectMode(!selectMode); setSelectedIds(new Set()); }}
+        >
+          <EyeOff className="h-3.5 w-3.5" />
+          Ocultar
+        </Button>
       </div>
+
+      {selectMode && (
+        <div className="flex items-center gap-3 mb-3">
+          <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={selectAll}>
+            <CheckSquare className="h-3 w-3" />
+            {selectedIds.size === filtered.length ? "Desmarcar todos" : "Selecionar todos"}
+          </Button>
+          {selectedIds.size > 0 && (
+            <Button variant="destructive" size="sm" className="h-7 text-xs gap-1" onClick={hideSelected}>
+              <EyeOff className="h-3 w-3" />
+              Ocultar selecionados ({selectedIds.size})
+            </Button>
+          )}
+        </div>
+      )}
 
       <div className="rounded-lg border border-border overflow-hidden">
         <Table>
