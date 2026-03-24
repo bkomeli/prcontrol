@@ -44,9 +44,40 @@ export default function Historico() {
           a.transportador.toLowerCase().includes(q);
         if (!match) return false;
       }
+      if (hiddenIds.has(a.id)) return false;
       return true;
     });
-  }, [activations, search, filterStatus, filterEquipe, filterDate]);
+  }, [activations, search, filterStatus, filterEquipe, filterDate, hiddenIds]);
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const selectAll = () => {
+    if (selectedIds.size === filtered.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filtered.map((a) => a.id)));
+    }
+  };
+
+  const hideSelected = () => {
+    setHiddenIds((prev) => {
+      const next = new Set(prev);
+      selectedIds.forEach((id) => next.add(id));
+      return next;
+    });
+    setSelectedIds(new Set());
+    setSelectMode(false);
+  };
+
+  const showAll = () => {
+    setHiddenIds(new Set());
+  };
 
   const formatTime = (iso: string) => {
     const d = new Date(iso);
