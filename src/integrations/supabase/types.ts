@@ -31,6 +31,7 @@ export type Database = {
           sm: string
           status: string
           transportador: string
+          urgente: boolean
         }
         Insert: {
           armado: string
@@ -48,6 +49,7 @@ export type Database = {
           sm: string
           status?: string
           transportador: string
+          urgente?: boolean
         }
         Update: {
           armado?: string
@@ -65,6 +67,7 @@ export type Database = {
           sm?: string
           status?: string
           transportador?: string
+          urgente?: boolean
         }
         Relationships: []
       }

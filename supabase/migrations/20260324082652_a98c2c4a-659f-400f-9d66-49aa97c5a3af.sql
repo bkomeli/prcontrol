@@ -1,0 +1,1 @@
+ALTER TABLE public.activations ADD COLUMN urgente BOOLEAN NOT NULL DEFAULT false;
