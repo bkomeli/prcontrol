@@ -156,6 +156,7 @@ export default function Historico() {
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
+              {selectMode && <TableHead className="text-xs w-8"></TableHead>}
               <TableHead className="text-xs w-8"></TableHead>
               <TableHead className="text-xs">Placa</TableHead>
               <TableHead className="text-xs">Transportadora</TableHead>
