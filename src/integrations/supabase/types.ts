@@ -14,7 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      activations: {
+        Row: {
+          armado: string
+          atualizado_em: string
+          autorizado_por: string
+          carreta: string
+          cavalo: string
+          criado_em: string
+          equipe: string | null
+          id: string
+          lat_long: string
+          motivo: string
+          responsavel: string | null
+          resumo: string
+          sm: string
+          status: string
+          transportador: string
+        }
+        Insert: {
+          armado: string
+          atualizado_em?: string
+          autorizado_por: string
+          carreta: string
+          cavalo: string
+          criado_em?: string
+          equipe?: string | null
+          id?: string
+          lat_long: string
+          motivo: string
+          responsavel?: string | null
+          resumo: string
+          sm: string
+          status?: string
+          transportador: string
+        }
+        Update: {
+          armado?: string
+          atualizado_em?: string
+          autorizado_por?: string
+          carreta?: string
+          cavalo?: string
+          criado_em?: string
+          equipe?: string | null
+          id?: string
+          lat_long?: string
+          motivo?: string
+          responsavel?: string | null
+          resumo?: string
+          sm?: string
+          status?: string
+          transportador?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
