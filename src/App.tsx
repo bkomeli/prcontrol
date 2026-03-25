@@ -1,11 +1,9 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { TopNav } from "@/components/TopNav";
-import { ActivationProvider } from "@/context/ActivationContext";
-import { DateFilterProvider } from "@/context/DateFilterContext";
 import Index from "./pages/Index";
 import PrAtivas from "./pages/PrAtivas";
 import Historico from "./pages/Historico";
@@ -21,26 +19,20 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <ActivationProvider>
-          <DateFilterProvider>
-            <div className="min-h-screen flex flex-col w-full">
-              <TopNav />
-              <main className="flex-1 overflow-auto">
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/pr-ativas" element={<PrAtivas />} />
-                  <Route path="/historico" element={<Historico />} />
-                  <Route path="/relatorios" element={<Dashboard />} />
-                  <Route path="/cadastros" element={<Cadastros />} />
-                  <Route path="/painel" element={<LivePanel />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </main>
-            </div>
-          </DateFilterProvider>
-        </ActivationProvider>
-      </BrowserRouter>
+      <div className="min-h-screen flex flex-col w-full">
+        <TopNav />
+        <main className="flex-1 overflow-auto">
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/pr-ativas" element={<PrAtivas />} />
+            <Route path="/historico" element={<Historico />} />
+            <Route path="/relatorios" element={<Dashboard />} />
+            <Route path="/cadastros" element={<Cadastros />} />
+            <Route path="/painel" element={<LivePanel />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
+      </div>
     </TooltipProvider>
   </QueryClientProvider>
 );
