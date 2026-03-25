@@ -71,6 +71,24 @@ export type Database = {
         }
         Relationships: []
       }
+      equipes: {
+        Row: {
+          criado_em: string
+          id: string
+          nome: string
+        }
+        Insert: {
+          criado_em?: string
+          id?: string
+          nome: string
+        }
+        Update: {
+          criado_em?: string
+          id?: string
+          nome?: string
+        }
+        Relationships: []
+      }
       motivos: {
         Row: {
           criado_em: string
