@@ -6,6 +6,7 @@ import { DetailModal } from "@/components/DetailModal";
 import { DateFilter } from "@/components/DateFilter";
 import { STATUS_LIST, TEAMS } from "@/types/activation";
 import type { Activation, ActivationStatus } from "@/types/activation";
+import type { DateRange } from "react-day-picker";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -19,16 +20,17 @@ export default function Historico() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterEquipe, setFilterEquipe] = useState<string>("all");
-  const [filterDate, setFilterDate] = useState(new Date());
+  const today = new Date();
+  const [dateRange, setDateRange] = useState<DateRange>({ from: today, to: today });
   const [selected, setSelected] = useState<Activation | null>(null);
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const filtered = useMemo(() => {
-    const dayStart = new Date(filterDate);
+    const dayStart = dateRange.from ? new Date(dateRange.from) : new Date();
     dayStart.setHours(0, 0, 0, 0);
-    const dayEnd = new Date(filterDate);
+    const dayEnd = dateRange.to ? new Date(dateRange.to) : new Date(dayStart);
     dayEnd.setHours(23, 59, 59, 999);
 
     return activations.filter((a) => {
