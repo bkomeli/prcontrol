@@ -4,15 +4,17 @@ import { ActivationCard } from "@/components/ActivationCard";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DateFilter } from "@/components/DateFilter";
 import { Radio } from "lucide-react";
+import type { DateRange } from "react-day-picker";
 
 export function ActivationQueue() {
   const { activations } = useActivations();
-  const [filterDate, setFilterDate] = useState(new Date());
+  const today = new Date();
+  const [dateRange, setDateRange] = useState<DateRange>({ from: today, to: today });
 
   const active = useMemo(() => {
-    const dayStart = new Date(filterDate);
+    const dayStart = dateRange.from ? new Date(dateRange.from) : new Date();
     dayStart.setHours(0, 0, 0, 0);
-    const dayEnd = new Date(filterDate);
+    const dayEnd = dateRange.to ? new Date(dateRange.to) : new Date(dayStart);
     dayEnd.setHours(23, 59, 59, 999);
 
     return activations
@@ -25,7 +27,7 @@ export function ActivationQueue() {
         if (a.urgente !== b.urgente) return a.urgente ? -1 : 1;
         return 0;
       });
-  }, [activations, filterDate]);
+  }, [activations, dateRange]);
 
   return (
     <div className="flex flex-col h-full">
