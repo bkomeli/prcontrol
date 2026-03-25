@@ -44,7 +44,7 @@ export default function PrAtivas() {
   }, [active]);
 
   return (
-    <div className="p-6">
+    <div className="p-6 animate-fade-in">
       <div className="flex items-center gap-3 mb-6">
         <h1 className="text-xl font-semibold text-foreground flex items-center gap-2">
           <Shield className="h-6 w-6 text-primary" />
@@ -55,7 +55,7 @@ export default function PrAtivas() {
         </h1>
         <div className="ml-auto flex items-center gap-2">
           {active.length > 0 && (
-            <Button variant="outline" size="sm" className="h-9 text-xs gap-1" onClick={copyScript}>
+            <Button variant="outline" size="sm" className="h-9 text-xs gap-1 transition-all duration-200 hover:scale-105" onClick={copyScript}>
               <Copy className="h-3.5 w-3.5" />
               Copiar PRs Ativas
             </Button>
@@ -65,13 +65,13 @@ export default function PrAtivas() {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
           <CardSkeleton count={3} />
         </div>
       ) : active.length === 0 ? (
         <p className="text-muted-foreground text-center py-12">Nenhuma PR ativa no momento</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
           {active.map((a) => (
             <ActivationCard key={a.id} activation={a} showQuickActions />
           ))}

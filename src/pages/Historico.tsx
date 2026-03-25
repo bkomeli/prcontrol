@@ -7,13 +7,14 @@ import { DetailModal } from "@/components/DetailModal";
 import { StatusTimeline } from "@/components/StatusTimeline";
 import { DateFilter } from "@/components/DateFilter";
 import { TableSkeleton } from "@/components/LoadingSkeleton";
-import { STATUS_LIST, TEAMS } from "@/types/activation";
+import { STATUS_LIST } from "@/types/activation";
+import { useEquipes } from "@/hooks/useCadastros";
 import type { Activation, ActivationStatus } from "@/types/activation";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { History, Search, AlertTriangle, EyeOff, Eye, CheckSquare, Download, Clock } from "lucide-react";
+import { History, Search, AlertTriangle, EyeOff, Eye, CheckSquare, Download } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
@@ -56,6 +57,7 @@ function exportXLS(data: Activation[]) {
 export default function Historico() {
   const { activations, loading } = useActivations();
   const { dateRange, setDateRange } = useDateFilter();
+  const { items: equipes } = useEquipes();
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterEquipe, setFilterEquipe] = useState<string>("all");
@@ -82,7 +84,8 @@ export default function Historico() {
           a.sm.toLowerCase().includes(q) ||
           a.cavalo.toLowerCase().includes(q) ||
           a.carreta.toLowerCase().includes(q) ||
-          a.transportador.toLowerCase().includes(q);
+          a.transportador.toLowerCase().includes(q) ||
+          a.motivo.toLowerCase().includes(q);
         if (!match) return false;
       }
       if (hiddenIds.has(a.id)) return false;
@@ -118,16 +121,16 @@ export default function Historico() {
   const formatTime = (iso: string) => new Date(iso).toLocaleString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 
   return (
-    <div className="p-6">
+    <div className="p-6 animate-fade-in">
       <h1 className="text-xl font-semibold text-foreground mb-6 flex items-center gap-2">
         <History className="h-6 w-6 text-primary" />
         Histórico
       </h1>
 
-      <div className="flex flex-wrap items-center gap-3 mb-4">
+      <div className="flex flex-wrap items-center gap-3 mb-5">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar SM, placa, transportador..." className="pl-9 h-9 text-sm" />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar SM, placa, transportador, motivo..." className="pl-9 h-9 text-sm" />
         </div>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
           <SelectTrigger className="h-9 w-44 text-sm"><SelectValue placeholder="Status" /></SelectTrigger>
@@ -140,15 +143,15 @@ export default function Historico() {
           <SelectTrigger className="h-9 w-40 text-sm"><SelectValue placeholder="Equipe" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todas equipes</SelectItem>
-            {TEAMS.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+            {equipes.map((t) => <SelectItem key={t.id} value={t.nome}>{t.nome}</SelectItem>)}
           </SelectContent>
         </Select>
         <DateFilter range={dateRange} onChange={setDateRange} />
 
-        <Button variant="outline" size="sm" className="h-9 text-xs gap-1" onClick={() => { exportCSV(filtered); toast.success("CSV exportado!"); }}>
+        <Button variant="outline" size="sm" className="h-9 text-xs gap-1 transition-colors duration-200" onClick={() => { exportCSV(filtered); toast.success("CSV exportado!"); }}>
           <Download className="h-3.5 w-3.5" /> CSV
         </Button>
-        <Button variant="outline" size="sm" className="h-9 text-xs gap-1" onClick={() => { exportXLS(filtered); toast.success("XLS exportado!"); }}>
+        <Button variant="outline" size="sm" className="h-9 text-xs gap-1 transition-colors duration-200" onClick={() => { exportXLS(filtered); toast.success("XLS exportado!"); }}>
           <Download className="h-3.5 w-3.5" /> XLS
         </Button>
 
@@ -157,7 +160,7 @@ export default function Historico() {
             <Eye className="h-3.5 w-3.5" /> Mostrar ocultos ({hiddenIds.size})
           </Button>
         )}
-        <Button variant={selectMode ? "default" : "outline"} size="sm" className="h-9 text-xs gap-1" onClick={() => { setSelectMode(!selectMode); setSelectedIds(new Set()); }}>
+        <Button variant={selectMode ? "default" : "outline"} size="sm" className="h-9 text-xs gap-1 transition-colors duration-200" onClick={() => { setSelectMode(!selectMode); setSelectedIds(new Set()); }}>
           <EyeOff className="h-3.5 w-3.5" /> Ocultar
         </Button>
       </div>
@@ -201,27 +204,27 @@ export default function Historico() {
                 </TableRow>
               ) : (
                 filtered.map((a) => (
-                  <TableRow key={a.id} className="cursor-pointer hover:bg-muted/30" onClick={() => setSelected(a)}>
+                  <TableRow key={a.id} className="cursor-pointer hover:bg-muted/30 transition-colors duration-150" onClick={() => setSelected(a)}>
                     {selectMode && (
-                      <TableCell className="px-2" onClick={(e) => e.stopPropagation()}>
+                      <TableCell className="px-3" onClick={(e) => e.stopPropagation()}>
                         <Checkbox checked={selectedIds.has(a.id)} onCheckedChange={() => toggleSelect(a.id)} />
                       </TableCell>
                     )}
-                    <TableCell className="px-2">{a.urgente && <AlertTriangle className="h-3.5 w-3.5 text-destructive" />}</TableCell>
-                    <TableCell className="text-sm font-mono">
+                    <TableCell className="px-3">{a.urgente && <AlertTriangle className="h-3.5 w-3.5 text-destructive" />}</TableCell>
+                    <TableCell className="text-sm font-mono py-3">
                       <button
-                        className="hover:underline hover:text-primary transition-colors text-left"
+                        className="hover:underline hover:text-primary transition-colors duration-200 text-left"
                         onClick={(e) => { e.stopPropagation(); setTimelinePlaca(a.cavalo); }}
                       >
                         {a.cavalo}{a.carreta ? ` / ${a.carreta}` : ""}
                       </button>
                     </TableCell>
-                    <TableCell className="text-sm">{a.transportador}</TableCell>
-                    <TableCell className="text-sm max-w-[200px] truncate">{a.motivo}</TableCell>
-                    <TableCell><StatusBadge status={a.status} /></TableCell>
-                    <TableCell className="text-sm">{a.equipe || "—"}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{formatTime(a.criadoEm)}</TableCell>
-                    <TableCell onClick={(e) => e.stopPropagation()}>
+                    <TableCell className="text-sm py-3">{a.transportador}</TableCell>
+                    <TableCell className="text-sm max-w-[200px] truncate py-3">{a.motivo}</TableCell>
+                    <TableCell className="py-3"><StatusBadge status={a.status} /></TableCell>
+                    <TableCell className="text-sm py-3">{a.equipe || "—"}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground py-3">{formatTime(a.criadoEm)}</TableCell>
+                    <TableCell className="py-3" onClick={(e) => e.stopPropagation()}>
                       {a.status !== "Finalizado" && a.status !== "Cancelado" && <QuickActions activation={a} />}
                     </TableCell>
                   </TableRow>
