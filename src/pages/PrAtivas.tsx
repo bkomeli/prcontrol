@@ -1,16 +1,16 @@
-import { useState, useMemo, useCallback } from "react";
+import { useMemo, useCallback } from "react";
 import { useActivations } from "@/context/ActivationContext";
+import { useDateFilter } from "@/context/DateFilterContext";
 import { ActivationCard } from "@/components/ActivationCard";
+import { CardSkeleton } from "@/components/LoadingSkeleton";
 import { DateFilter } from "@/components/DateFilter";
 import { Button } from "@/components/ui/button";
 import { Shield, Copy } from "lucide-react";
 import { toast } from "sonner";
-import type { DateRange } from "react-day-picker";
 
 export default function PrAtivas() {
-  const { activations } = useActivations();
-  const today = new Date();
-  const [dateRange, setDateRange] = useState<DateRange>({ from: today, to: today });
+  const { activations, loading } = useActivations();
+  const { dateRange, setDateRange } = useDateFilter();
 
   const active = useMemo(() => {
     const dayStart = dateRange.from ? new Date(dateRange.from) : new Date();
@@ -64,7 +64,11 @@ export default function PrAtivas() {
         </div>
       </div>
 
-      {active.length === 0 ? (
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <CardSkeleton count={3} />
+        </div>
+      ) : active.length === 0 ? (
         <p className="text-muted-foreground text-center py-12">Nenhuma PR ativa no momento</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">

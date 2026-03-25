@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useActivations } from "@/context/ActivationContext";
 import { useTransportadoras, useMotivos } from "@/hooks/useCadastros";
 import { Button } from "@/components/ui/button";
@@ -52,13 +52,17 @@ Breve resumo: ${form.resumo}`;
     toast.success("PR criada! Script copiado automaticamente.");
   }, [form, urgente, addActivation]);
 
-  const textFields = [
-    { key: "sm", label: "SM", placeholder: "Número da SM" },
-    { key: "cavalo", label: "Cavalo", placeholder: "Placa do cavalo" },
-    { key: "carreta", label: "Carreta", placeholder: "Placa da carreta" },
-    { key: "latLong", label: "Lat / Long", placeholder: "-23.5505, -46.6333" },
-    { key: "autorizadoPor", label: "Autorizado por quem", placeholder: "Nome do autorizador" },
-  ];
+  // Keyboard shortcut: Enter to save (when not in textarea)
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Enter" && !e.shiftKey && (e.target as HTMLElement)?.tagName !== "TEXTAREA") {
+        e.preventDefault();
+        handleSubmit();
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [handleSubmit]);
 
   return (
     <Card className="p-5 shadow-sm border-border">
@@ -68,19 +72,27 @@ Breve resumo: ${form.resumo}`;
       </h2>
 
       <div className="grid grid-cols-2 gap-3">
-        {textFields.map(({ key, label, placeholder }) => (
-          <div key={key}>
-            <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
-            <Input
-              value={(form as any)[key]}
-              onChange={set(key)}
-              placeholder={placeholder}
-              className="mt-1 h-8 text-sm"
-            />
-          </div>
-        ))}
+        {/* Row 1: SM | Lat/Long */}
+        <div>
+          <Label className="text-xs font-medium text-muted-foreground">SM</Label>
+          <Input value={form.sm} onChange={set("sm")} placeholder="Número da SM" className="mt-1 h-8 text-sm" />
+        </div>
+        <div>
+          <Label className="text-xs font-medium text-muted-foreground">Lat / Long</Label>
+          <Input value={form.latLong} onChange={set("latLong")} placeholder="-23.5505, -46.6333" className="mt-1 h-8 text-sm" />
+        </div>
 
-        {/* Transportador select */}
+        {/* Row 2: Cavalo | Carreta */}
+        <div>
+          <Label className="text-xs font-medium text-muted-foreground">Cavalo</Label>
+          <Input value={form.cavalo} onChange={set("cavalo")} placeholder="Placa do cavalo" className="mt-1 h-8 text-sm" />
+        </div>
+        <div>
+          <Label className="text-xs font-medium text-muted-foreground">Carreta</Label>
+          <Input value={form.carreta} onChange={set("carreta")} placeholder="Placa da carreta" className="mt-1 h-8 text-sm" />
+        </div>
+
+        {/* Row 3: Transportador | Armado */}
         <div>
           <Label className="text-xs font-medium text-muted-foreground">Transportador</Label>
           <Select value={form.transportador} onValueChange={(v) => setField("transportador", v)}>
@@ -94,8 +106,6 @@ Breve resumo: ${form.resumo}`;
             </SelectContent>
           </Select>
         </div>
-
-        {/* Armado select */}
         <div>
           <Label className="text-xs font-medium text-muted-foreground">Armado</Label>
           <Select value={form.armado} onValueChange={(v) => setField("armado", v)}>
@@ -108,6 +118,12 @@ Breve resumo: ${form.resumo}`;
               <SelectItem value="NÃO">NÃO</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+
+        {/* Row 4: Autorizado por (full width below armado) */}
+        <div className="col-span-2">
+          <Label className="text-xs font-medium text-muted-foreground">Autorizado por quem</Label>
+          <Input value={form.autorizadoPor} onChange={set("autorizadoPor")} placeholder="Nome do autorizador" className="mt-1 h-8 text-sm" />
         </div>
 
         {/* Motivo select */}

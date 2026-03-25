@@ -1,15 +1,15 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { useActivations } from "@/context/ActivationContext";
+import { useDateFilter } from "@/context/DateFilterContext";
 import { ActivationCard } from "@/components/ActivationCard";
+import { CardSkeleton } from "@/components/LoadingSkeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DateFilter } from "@/components/DateFilter";
 import { Radio } from "lucide-react";
-import type { DateRange } from "react-day-picker";
 
 export function ActivationQueue() {
-  const { activations } = useActivations();
-  const today = new Date();
-  const [dateRange, setDateRange] = useState<DateRange>({ from: today, to: today });
+  const { activations, loading } = useActivations();
+  const { dateRange, setDateRange } = useDateFilter();
 
   const active = useMemo(() => {
     const dayStart = dateRange.from ? new Date(dateRange.from) : new Date();
@@ -45,7 +45,9 @@ export function ActivationQueue() {
       </div>
 
       <ScrollArea className="flex-1 -mr-2 pr-2">
-        {active.length === 0 ? (
+        {loading ? (
+          <CardSkeleton count={3} />
+        ) : active.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-8">
             Nenhum acionamento ativo
           </p>
