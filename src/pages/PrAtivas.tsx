@@ -23,7 +23,7 @@ export default function PrAtivas() {
       const d = new Date(a.criadoEm);
       return d >= dayStart && d <= dayEnd;
     });
-  }, [activations, filterDate]);
+  }, [activations, dateRange]);
 
   const statusLabel = (s: string) => {
     if (s === "Aguardando equipe") return "Cotando";
