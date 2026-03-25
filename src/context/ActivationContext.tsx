@@ -102,9 +102,18 @@ export function ActivationProvider({ children }: { children: React.ReactNode }) 
   const updateActivation = useCallback(async (id: string, updates: Partial<Activation>) => {
     setActivations((prev) => prev.map((a) => a.id === id ? { ...a, ...updates, atualizadoEm: new Date().toISOString() } : a));
     const dbUpdates: Record<string, any> = {};
-    if (updates.status) dbUpdates.status = updates.status;
-    if (updates.equipe) dbUpdates.equipe = updates.equipe;
+    if (updates.status !== undefined) dbUpdates.status = updates.status;
+    if (updates.equipe !== undefined) dbUpdates.equipe = updates.equipe;
     if (updates.responsavel !== undefined) dbUpdates.responsavel = updates.responsavel;
+    if (updates.sm !== undefined) dbUpdates.sm = updates.sm;
+    if (updates.transportador !== undefined) dbUpdates.transportador = updates.transportador;
+    if (updates.cavalo !== undefined) dbUpdates.cavalo = updates.cavalo;
+    if (updates.carreta !== undefined) dbUpdates.carreta = updates.carreta;
+    if (updates.latLong !== undefined) dbUpdates.lat_long = updates.latLong;
+    if (updates.armado !== undefined) dbUpdates.armado = updates.armado;
+    if (updates.motivo !== undefined) dbUpdates.motivo = updates.motivo;
+    if (updates.autorizadoPor !== undefined) dbUpdates.autorizado_por = updates.autorizadoPor;
+    if (updates.resumo !== undefined) dbUpdates.resumo = updates.resumo;
     await supabase.from("activations").update(dbUpdates).eq("id", id);
   }, []);
 
