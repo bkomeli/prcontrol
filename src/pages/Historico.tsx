@@ -50,7 +50,7 @@ export default function Historico() {
       if (hiddenIds.has(a.id)) return false;
       return true;
     });
-  }, [activations, search, filterStatus, filterEquipe, filterDate, hiddenIds]);
+  }, [activations, search, filterStatus, filterEquipe, dateRange, hiddenIds]);
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => {
