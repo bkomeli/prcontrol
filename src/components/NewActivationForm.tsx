@@ -1,37 +1,33 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import { useActivations } from "@/context/ActivationContext";
+import { useTransportadoras, useMotivos } from "@/hooks/useCadastros";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Zap, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
 const initialForm = {
   sm: "", transportador: "", cavalo: "", carreta: "",
-  latLong: "", armado: "", motivo: "", autorizadoPor: "", resumo: "",
+  latLong: "", armado: "AMBOS", motivo: "", autorizadoPor: "", resumo: "",
 };
 
 export function NewActivationForm() {
   const [form, setForm] = useState(initialForm);
   const [urgente, setUrgente] = useState(false);
-  const { activations, addActivation } = useActivations();
+  const { addActivation } = useActivations();
+  const { items: transportadoras } = useTransportadoras();
+  const { items: motivos } = useMotivos();
 
   const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
-  // Autocomplete suggestions
-  const transportadorSuggestions = useMemo(() => {
-    const unique = new Set(activations.map((a) => a.transportador).filter(Boolean));
-    return Array.from(unique);
-  }, [activations]);
-
-  const motivoSuggestions = useMemo(() => {
-    const unique = new Set(activations.map((a) => a.motivo).filter(Boolean));
-    return Array.from(unique);
-  }, [activations]);
+  const setField = (field: string, value: string) =>
+    setForm((prev) => ({ ...prev, [field]: value }));
 
   const handleSubmit = useCallback(() => {
     if (!form.sm || !form.motivo) {
@@ -39,7 +35,6 @@ export function NewActivationForm() {
       return;
     }
 
-    // Generate script
     const script = `SM: ${form.sm}
 Transportador: ${form.transportador}
 Cavalo: ${form.cavalo}
@@ -50,24 +45,18 @@ Motivo do acionamento: ${form.motivo}
 Autorizado por quem? ${form.autorizadoPor}
 Breve resumo: ${form.resumo}`;
 
-    // Copy script
     navigator.clipboard.writeText(script);
-
-    // Save to queue
     addActivation({ ...form, urgente });
     setForm(initialForm);
     setUrgente(false);
     toast.success("PR criada! Script copiado automaticamente.");
   }, [form, urgente, addActivation]);
 
-  const fields = [
+  const textFields = [
     { key: "sm", label: "SM", placeholder: "Número da SM" },
-    { key: "transportador", label: "Transportador", placeholder: "Nome do transportador", list: "transportador-list" },
     { key: "cavalo", label: "Cavalo", placeholder: "Placa do cavalo" },
     { key: "carreta", label: "Carreta", placeholder: "Placa da carreta" },
     { key: "latLong", label: "Lat / Long", placeholder: "-23.5505, -46.6333" },
-    { key: "armado", label: "Armado", placeholder: "Sim / Não / Detalhes" },
-    { key: "motivo", label: "Motivo do acionamento", placeholder: "Descreva o motivo", list: "motivo-list" },
     { key: "autorizadoPor", label: "Autorizado por quem", placeholder: "Nome do autorizador" },
   ];
 
@@ -79,18 +68,63 @@ Breve resumo: ${form.resumo}`;
       </h2>
 
       <div className="grid grid-cols-2 gap-3">
-        {fields.map(({ key, label, placeholder, list }) => (
-          <div key={key} className={key === "motivo" ? "col-span-2" : ""}>
+        {textFields.map(({ key, label, placeholder }) => (
+          <div key={key}>
             <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
             <Input
               value={(form as any)[key]}
               onChange={set(key)}
               placeholder={placeholder}
               className="mt-1 h-8 text-sm"
-              list={list}
             />
           </div>
         ))}
+
+        {/* Transportador select */}
+        <div>
+          <Label className="text-xs font-medium text-muted-foreground">Transportador</Label>
+          <Select value={form.transportador} onValueChange={(v) => setField("transportador", v)}>
+            <SelectTrigger className="mt-1 h-8 text-sm">
+              <SelectValue placeholder="Selecionar transportador" />
+            </SelectTrigger>
+            <SelectContent>
+              {transportadoras.map((t) => (
+                <SelectItem key={t.id} value={t.nome}>{t.nome}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Armado select */}
+        <div>
+          <Label className="text-xs font-medium text-muted-foreground">Armado</Label>
+          <Select value={form.armado} onValueChange={(v) => setField("armado", v)}>
+            <SelectTrigger className="mt-1 h-8 text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="AMBOS">AMBOS</SelectItem>
+              <SelectItem value="SIM">SIM</SelectItem>
+              <SelectItem value="NÃO">NÃO</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Motivo select */}
+        <div className="col-span-2">
+          <Label className="text-xs font-medium text-muted-foreground">Motivo do acionamento</Label>
+          <Select value={form.motivo} onValueChange={(v) => setField("motivo", v)}>
+            <SelectTrigger className="mt-1 h-8 text-sm">
+              <SelectValue placeholder="Selecionar motivo" />
+            </SelectTrigger>
+            <SelectContent>
+              {motivos.map((m) => (
+                <SelectItem key={m.id} value={m.nome}>{m.nome}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         <div className="col-span-2">
           <Label className="text-xs font-medium text-muted-foreground">Breve resumo</Label>
           <Textarea
@@ -119,14 +153,6 @@ Breve resumo: ${form.resumo}`;
           Acionar PR
         </Button>
       </div>
-
-      {/* Datalists for autocomplete */}
-      <datalist id="transportador-list">
-        {transportadorSuggestions.map((s) => <option key={s} value={s} />)}
-      </datalist>
-      <datalist id="motivo-list">
-        {motivoSuggestions.map((s) => <option key={s} value={s} />)}
-      </datalist>
     </Card>
   );
 }

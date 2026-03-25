@@ -1,10 +1,12 @@
-import { LayoutDashboard, Siren, History } from "lucide-react";
+import { LayoutDashboard, Siren, History, BarChart3, Settings } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 
 const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "PR Ativas", url: "/pr-ativas", icon: Siren },
   { title: "Histórico", url: "/historico", icon: History },
+  { title: "Relatórios", url: "/relatorios", icon: BarChart3 },
+  { title: "Cadastros", url: "/cadastros", icon: Settings },
 ];
 
 export function TopNav() {
