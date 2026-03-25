@@ -5,15 +5,17 @@ import { DateFilter } from "@/components/DateFilter";
 import { Button } from "@/components/ui/button";
 import { Shield, Copy } from "lucide-react";
 import { toast } from "sonner";
+import type { DateRange } from "react-day-picker";
 
 export default function PrAtivas() {
   const { activations } = useActivations();
-  const [filterDate, setFilterDate] = useState(new Date());
+  const today = new Date();
+  const [dateRange, setDateRange] = useState<DateRange>({ from: today, to: today });
 
   const active = useMemo(() => {
-    const dayStart = new Date(filterDate);
+    const dayStart = dateRange.from ? new Date(dateRange.from) : new Date();
     dayStart.setHours(0, 0, 0, 0);
-    const dayEnd = new Date(filterDate);
+    const dayEnd = dateRange.to ? new Date(dateRange.to) : new Date(dayStart);
     dayEnd.setHours(23, 59, 59, 999);
 
     return activations.filter((a) => {
@@ -21,7 +23,7 @@ export default function PrAtivas() {
       const d = new Date(a.criadoEm);
       return d >= dayStart && d <= dayEnd;
     });
-  }, [activations, filterDate]);
+  }, [activations, dateRange]);
 
   const statusLabel = (s: string) => {
     if (s === "Aguardando equipe") return "Cotando";
@@ -58,7 +60,7 @@ export default function PrAtivas() {
               Copiar PRs Ativas
             </Button>
           )}
-          <DateFilter date={filterDate} onChange={setFilterDate} />
+          <DateFilter range={dateRange} onChange={setDateRange} />
         </div>
       </div>
 
