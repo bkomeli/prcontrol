@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -13,24 +13,43 @@ export function DateFilter({ range, onChange }: { range: DateRange; onChange: (r
       ? format(range.from, "dd/MM/yyyy")
       : "Selecionar período";
 
+  const reset = () => {
+    const today = new Date();
+    onChange({ from: today, to: today });
+  };
+
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="h-9 text-sm gap-2">
-          <CalendarIcon className="h-4 w-4" />
-          {label}
+    <div className="flex items-center gap-1">
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="outline" size="sm" className="h-9 text-sm gap-2 transition-colors duration-200">
+            <CalendarIcon className="h-4 w-4" />
+            {label}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <Calendar
+            mode="range"
+            selected={range}
+            onSelect={(r) => {
+              if (r) onChange(r);
+            }}
+            numberOfMonths={2}
+            initialFocus
+            className={cn("p-3 pointer-events-auto")}
+          />
+          <div className="px-3 pb-3 flex justify-end">
+            <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={reset}>
+              Resetar para hoje
+            </Button>
+          </div>
+        </PopoverContent>
+      </Popover>
+      {range.from && (
+        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground transition-colors" onClick={reset}>
+          <X className="h-3.5 w-3.5" />
         </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
-        <Calendar
-          mode="range"
-          selected={range}
-          onSelect={(r) => r && onChange(r)}
-          numberOfMonths={2}
-          initialFocus
-          className={cn("p-3 pointer-events-auto")}
-        />
-      </PopoverContent>
-    </Popover>
+      )}
+    </div>
   );
 }

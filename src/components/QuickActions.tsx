@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useActivations } from "@/context/ActivationContext";
 import type { Activation, ActivationStatus } from "@/types/activation";
 import { Button } from "@/components/ui/button";
@@ -13,14 +14,22 @@ const actions: { status: ActivationStatus; label: string; icon: React.ElementTyp
 
 export function QuickActions({ activation }: { activation: Activation }) {
   const { updateStatus } = useActivations();
+  const [saving, setSaving] = useState<string | null>(null);
 
-  const handle = (status: ActivationStatus) => {
-    updateStatus(activation.id, status);
-    toast.success(`Status alterado para "${status}"`);
+  const handle = async (status: ActivationStatus) => {
+    setSaving(status);
+    try {
+      await updateStatus(activation.id, status);
+      toast.success(`Atualizado com sucesso ✅`);
+    } catch {
+      toast.error("Erro ao atualizar. Tente novamente.");
+    } finally {
+      setSaving(null);
+    }
   };
 
   return (
-    <div className="flex flex-wrap gap-1.5">
+    <div className="flex flex-wrap gap-2">
       {actions
         .filter((a) => a.status !== activation.status)
         .map((a) => (
@@ -28,11 +37,12 @@ export function QuickActions({ activation }: { activation: Activation }) {
             key={a.status}
             variant={a.variant}
             size="sm"
-            className="h-7 text-xs"
+            className="h-7 text-xs transition-all duration-200 hover:scale-105 active:scale-95"
             onClick={(e) => { e.stopPropagation(); handle(a.status); }}
+            disabled={saving !== null}
           >
             <a.icon className="h-3 w-3 mr-1" />
-            {a.label}
+            {saving === a.status ? "Salvando…" : a.label}
           </Button>
         ))}
     </div>

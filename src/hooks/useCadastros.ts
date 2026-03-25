@@ -6,7 +6,7 @@ interface CadastroItem {
   nome: string;
 }
 
-function useCadastroTable(table: "transportadoras" | "motivos") {
+function useCadastroTable(table: "transportadoras" | "motivos" | "equipes") {
   const [items, setItems] = useState<CadastroItem[]>([]);
 
   const fetch = useCallback(async () => {
@@ -37,4 +37,8 @@ export function useTransportadoras() {
 
 export function useMotivos() {
   return useCadastroTable("motivos");
+}
+
+export function useEquipes() {
+  return useCadastroTable("equipes");
 }

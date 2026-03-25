@@ -6,8 +6,7 @@ export type ActivationStatus =
   | "Finalizado"
   | "Cancelado";
 
-export const TEAMS = ["MIKE", "ATIVA", "RECOVERY", "FOCUS", "VELOX"] as const;
-export type Team = (typeof TEAMS)[number];
+export type Team = string;
 
 export interface Activation {
   id: string;

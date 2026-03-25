@@ -8,6 +8,16 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pi
 
 const COLORS = ["hsl(50,100%,50%)", "hsl(217,91%,60%)", "hsl(25,95%,53%)", "hsl(280,65%,60%)", "hsl(142,71%,45%)", "hsl(0,84%,60%)", "hsl(180,60%,50%)", "hsl(330,70%,55%)"];
 
+function CustomTooltip({ active, payload, label, metricLabel }: any) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="bg-card border border-border rounded-lg px-3 py-2 shadow-lg">
+      <p className="text-xs font-medium text-foreground mb-1">{payload[0]?.payload?.name || label}</p>
+      <p className="text-sm text-primary font-semibold">{metricLabel}: {payload[0]?.value}</p>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const { activations } = useActivations();
   const { dateRange, setDateRange } = useDateFilter();
@@ -18,7 +28,6 @@ export default function Dashboard() {
     const dayEnd = dateRange.to ? new Date(dateRange.to) : new Date(dayStart);
     dayEnd.setHours(23, 59, 59, 999);
     return activations.filter((a) => {
-      // Ignore cancelled PRs
       if (a.status === "Cancelado") return false;
       const d = new Date(a.criadoEm);
       return d >= dayStart && d <= dayEnd;
@@ -44,7 +53,7 @@ export default function Dashboard() {
   }, [filtered]);
 
   return (
-    <div className="p-6">
+    <div className="p-6 animate-fade-in">
       <div className="flex items-center gap-3 mb-6">
         <h1 className="text-xl font-semibold text-foreground flex items-center gap-2">
           <BarChart3 className="h-6 w-6 text-primary" />
@@ -59,21 +68,21 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="p-5">
+        <Card className="p-6 transition-shadow duration-200 hover:shadow-lg">
           <h3 className="text-sm font-semibold text-foreground mb-4">Equipes mais acionadas</h3>
           {byTeam.length === 0 ? <p className="text-sm text-muted-foreground text-center py-8">Sem dados</p> : (
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={byTeam} layout="vertical">
                 <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} />
                 <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 12, fill: "hsl(var(--foreground))" }} />
-                <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, color: "hsl(var(--foreground))" }} />
+                <Tooltip content={<CustomTooltip metricLabel="Acionamentos" />} />
                 <Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}
         </Card>
 
-        <Card className="p-5">
+        <Card className="p-6 transition-shadow duration-200 hover:shadow-lg">
           <h3 className="text-sm font-semibold text-foreground mb-4">Motivos</h3>
           {byMotivo.length === 0 ? <p className="text-sm text-muted-foreground text-center py-8">Sem dados</p> : (
             <ResponsiveContainer width="100%" height={250}>
@@ -81,20 +90,20 @@ export default function Dashboard() {
                 <Pie data={byMotivo} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`} labelLine={false} fontSize={10}>
                   {byMotivo.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Pie>
-                <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, color: "hsl(var(--foreground))" }} />
+                <Tooltip content={<CustomTooltip metricLabel="Ocorrências" />} />
               </PieChart>
             </ResponsiveContainer>
           )}
         </Card>
 
-        <Card className="p-5 lg:col-span-2">
+        <Card className="p-6 lg:col-span-2 transition-shadow duration-200 hover:shadow-lg">
           <h3 className="text-sm font-semibold text-foreground mb-4">Transportadoras</h3>
           {byTransportadora.length === 0 ? <p className="text-sm text-muted-foreground text-center py-8">Sem dados</p> : (
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={byTransportadora}>
                 <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} angle={-45} textAnchor="end" height={80} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} />
-                <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, color: "hsl(var(--foreground))" }} />
+                <Tooltip content={<CustomTooltip metricLabel="PRs" />} />
                 <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>

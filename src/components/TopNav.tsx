@@ -14,7 +14,7 @@ const items = [
 export function TopNav() {
   return (
     <nav className="h-14 bg-card border-b border-border flex items-center px-6 shrink-0">
-      <Link to="/" className="text-base font-bold tracking-tight mr-8 hover:opacity-80 transition-opacity">
+      <Link to="/" className="text-base font-bold tracking-tight mr-8 hover:opacity-80 transition-opacity duration-200">
         <span className="text-primary">PR</span>
         <span className="text-foreground"> Control</span>
       </Link>
@@ -24,7 +24,7 @@ export function TopNav() {
             key={item.title}
             to={item.url}
             end={item.url === "/"}
-            className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+            className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-all duration-200"
             activeClassName="bg-accent text-primary font-medium"
           >
             <item.icon className="h-4 w-4" />
