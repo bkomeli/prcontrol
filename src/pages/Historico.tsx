@@ -122,7 +122,7 @@ export default function Historico() {
             {TEAMS.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
           </SelectContent>
         </Select>
-        <DateFilter date={filterDate} onChange={setFilterDate} />
+        <DateFilter range={dateRange} onChange={setDateRange} />
         {hiddenIds.size > 0 && (
           <Button variant="outline" size="sm" className="h-9 text-xs gap-1" onClick={showAll}>
             <Eye className="h-3.5 w-3.5" />

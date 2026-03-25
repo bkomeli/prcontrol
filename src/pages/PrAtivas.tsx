@@ -60,7 +60,7 @@ export default function PrAtivas() {
               Copiar PRs Ativas
             </Button>
           )}
-          <DateFilter date={filterDate} onChange={setFilterDate} />
+          <DateFilter range={dateRange} onChange={setDateRange} />
         </div>
       </div>
 

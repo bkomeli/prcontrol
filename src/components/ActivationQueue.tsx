@@ -40,7 +40,7 @@ export function ActivationQueue() {
           </span>
         </h2>
         <div className="ml-auto">
-          <DateFilter date={filterDate} onChange={setFilterDate} />
+          <DateFilter range={dateRange} onChange={setDateRange} />
         </div>
       </div>
 
