@@ -4,6 +4,7 @@ import type { Activation, ActivationStatus, Team } from "@/types/activation";
 
 interface ActivationContextType {
   activations: Activation[];
+  loading: boolean;
   addActivation: (data: Omit<Activation, "id" | "status" | "criadoEm" | "atualizadoEm">) => void;
   updateStatus: (id: string, status: ActivationStatus) => void;
   assignTeam: (id: string, equipe: Team, responsavel: string) => void;
@@ -35,6 +36,7 @@ function mapRow(row: any): Activation {
 
 export function ActivationProvider({ children }: { children: React.ReactNode }) {
   const [activations, setActivations] = useState<Activation[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const fetchAll = useCallback(async () => {
     const { data } = await supabase
@@ -42,6 +44,7 @@ export function ActivationProvider({ children }: { children: React.ReactNode }) 
       .select("*")
       .order("criado_em", { ascending: false });
     if (data) setActivations(data.map(mapRow));
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -66,7 +69,6 @@ export function ActivationProvider({ children }: { children: React.ReactNode }) 
       criadoEm: now,
       atualizadoEm: now,
     };
-    // Optimistic insert
     setActivations((prev) => [optimistic, ...prev]);
 
     await supabase.from("activations").insert({
@@ -107,7 +109,7 @@ export function ActivationProvider({ children }: { children: React.ReactNode }) 
   }, []);
 
   return (
-    <ActivationContext.Provider value={{ activations, addActivation, updateStatus, assignTeam, updateActivation }}>
+    <ActivationContext.Provider value={{ activations, loading, addActivation, updateStatus, assignTeam, updateActivation }}>
       {children}
     </ActivationContext.Provider>
   );

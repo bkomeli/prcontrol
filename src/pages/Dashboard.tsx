@@ -1,17 +1,16 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { useActivations } from "@/context/ActivationContext";
+import { useDateFilter } from "@/context/DateFilterContext";
 import { DateFilter } from "@/components/DateFilter";
 import { Card } from "@/components/ui/card";
 import { BarChart3 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import type { DateRange } from "react-day-picker";
 
 const COLORS = ["hsl(50,100%,50%)", "hsl(217,91%,60%)", "hsl(25,95%,53%)", "hsl(280,65%,60%)", "hsl(142,71%,45%)", "hsl(0,84%,60%)", "hsl(180,60%,50%)", "hsl(330,70%,55%)"];
 
 export default function Dashboard() {
   const { activations } = useActivations();
-  const today = new Date();
-  const [dateRange, setDateRange] = useState<DateRange>({ from: today, to: today });
+  const { dateRange, setDateRange } = useDateFilter();
 
   const filtered = useMemo(() => {
     const dayStart = dateRange.from ? new Date(dateRange.from) : new Date();
@@ -19,6 +18,8 @@ export default function Dashboard() {
     const dayEnd = dateRange.to ? new Date(dateRange.to) : new Date(dayStart);
     dayEnd.setHours(23, 59, 59, 999);
     return activations.filter((a) => {
+      // Ignore cancelled PRs
+      if (a.status === "Cancelado") return false;
       const d = new Date(a.criadoEm);
       return d >= dayStart && d <= dayEnd;
     });

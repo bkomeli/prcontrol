@@ -1,5 +1,6 @@
-import { LayoutDashboard, Siren, History, BarChart3, Settings } from "lucide-react";
+import { LayoutDashboard, Siren, History, BarChart3, Settings, Monitor } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
+import { Link } from "react-router-dom";
 
 const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
@@ -7,15 +8,16 @@ const items = [
   { title: "Histórico", url: "/historico", icon: History },
   { title: "Relatórios", url: "/relatorios", icon: BarChart3 },
   { title: "Cadastros", url: "/cadastros", icon: Settings },
+  { title: "Painel", url: "/painel", icon: Monitor },
 ];
 
 export function TopNav() {
   return (
     <nav className="h-14 bg-card border-b border-border flex items-center px-6 shrink-0">
-      <h1 className="text-base font-bold tracking-tight mr-8">
+      <Link to="/" className="text-base font-bold tracking-tight mr-8 hover:opacity-80 transition-opacity">
         <span className="text-primary">PR</span>
         <span className="text-foreground"> Control</span>
-      </h1>
+      </Link>
       <div className="flex items-center gap-1">
         {items.map((item) => (
           <NavLink

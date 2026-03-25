@@ -1,17 +1,19 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo } from "react";
 import { useActivations } from "@/context/ActivationContext";
+import { useDateFilter } from "@/context/DateFilterContext";
 import { StatusBadge } from "@/components/StatusBadge";
 import { QuickActions } from "@/components/QuickActions";
 import { DetailModal } from "@/components/DetailModal";
+import { StatusTimeline } from "@/components/StatusTimeline";
 import { DateFilter } from "@/components/DateFilter";
+import { TableSkeleton } from "@/components/LoadingSkeleton";
 import { STATUS_LIST, TEAMS } from "@/types/activation";
 import type { Activation, ActivationStatus } from "@/types/activation";
-import type { DateRange } from "react-day-picker";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { History, Search, AlertTriangle, EyeOff, Eye, CheckSquare, Download } from "lucide-react";
+import { History, Search, AlertTriangle, EyeOff, Eye, CheckSquare, Download, Clock } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
@@ -52,16 +54,16 @@ function exportXLS(data: Activation[]) {
 }
 
 export default function Historico() {
-  const { activations } = useActivations();
+  const { activations, loading } = useActivations();
+  const { dateRange, setDateRange } = useDateFilter();
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterEquipe, setFilterEquipe] = useState<string>("all");
-  const today = new Date();
-  const [dateRange, setDateRange] = useState<DateRange>({ from: today, to: today });
   const [selected, setSelected] = useState<Activation | null>(null);
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [timelinePlaca, setTimelinePlaca] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const dayStart = dateRange.from ? new Date(dateRange.from) : new Date();
@@ -175,49 +177,65 @@ export default function Historico() {
       )}
 
       <div className="rounded-lg border border-border overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted/50">
-              {selectMode && <TableHead className="text-xs w-8"></TableHead>}
-              <TableHead className="text-xs w-8"></TableHead>
-              <TableHead className="text-xs">Placa</TableHead>
-              <TableHead className="text-xs">Transportadora</TableHead>
-              <TableHead className="text-xs">Motivo</TableHead>
-              <TableHead className="text-xs">Status</TableHead>
-              <TableHead className="text-xs">Hora</TableHead>
-              <TableHead className="text-xs">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filtered.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={selectMode ? 8 : 7} className="text-center text-muted-foreground py-8">Nenhum registro encontrado</TableCell>
+        {loading ? (
+          <div className="p-4"><TableSkeleton rows={6} cols={8} /></div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50">
+                {selectMode && <TableHead className="text-xs w-8"></TableHead>}
+                <TableHead className="text-xs w-8"></TableHead>
+                <TableHead className="text-xs">Placa</TableHead>
+                <TableHead className="text-xs">Transportadora</TableHead>
+                <TableHead className="text-xs">Motivo</TableHead>
+                <TableHead className="text-xs">Status</TableHead>
+                <TableHead className="text-xs">Equipe</TableHead>
+                <TableHead className="text-xs">Hora</TableHead>
+                <TableHead className="text-xs">Ações</TableHead>
               </TableRow>
-            ) : (
-              filtered.map((a) => (
-                <TableRow key={a.id} className="cursor-pointer hover:bg-muted/30" onClick={() => setSelected(a)}>
-                  {selectMode && (
-                    <TableCell className="px-2" onClick={(e) => e.stopPropagation()}>
-                      <Checkbox checked={selectedIds.has(a.id)} onCheckedChange={() => toggleSelect(a.id)} />
-                    </TableCell>
-                  )}
-                  <TableCell className="px-2">{a.urgente && <AlertTriangle className="h-3.5 w-3.5 text-destructive" />}</TableCell>
-                  <TableCell className="text-sm font-mono">{a.cavalo}{a.carreta ? ` / ${a.carreta}` : ""}</TableCell>
-                  <TableCell className="text-sm">{a.transportador}</TableCell>
-                  <TableCell className="text-sm max-w-[200px] truncate">{a.motivo}</TableCell>
-                  <TableCell><StatusBadge status={a.status} /></TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{formatTime(a.criadoEm)}</TableCell>
-                  <TableCell onClick={(e) => e.stopPropagation()}>
-                    {a.status !== "Finalizado" && a.status !== "Cancelado" && <QuickActions activation={a} />}
-                  </TableCell>
+            </TableHeader>
+            <TableBody>
+              {filtered.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={selectMode ? 9 : 8} className="text-center text-muted-foreground py-8">Nenhum registro encontrado</TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ) : (
+                filtered.map((a) => (
+                  <TableRow key={a.id} className="cursor-pointer hover:bg-muted/30" onClick={() => setSelected(a)}>
+                    {selectMode && (
+                      <TableCell className="px-2" onClick={(e) => e.stopPropagation()}>
+                        <Checkbox checked={selectedIds.has(a.id)} onCheckedChange={() => toggleSelect(a.id)} />
+                      </TableCell>
+                    )}
+                    <TableCell className="px-2">{a.urgente && <AlertTriangle className="h-3.5 w-3.5 text-destructive" />}</TableCell>
+                    <TableCell className="text-sm font-mono">
+                      <button
+                        className="hover:underline hover:text-primary transition-colors text-left"
+                        onClick={(e) => { e.stopPropagation(); setTimelinePlaca(a.cavalo); }}
+                      >
+                        {a.cavalo}{a.carreta ? ` / ${a.carreta}` : ""}
+                      </button>
+                    </TableCell>
+                    <TableCell className="text-sm">{a.transportador}</TableCell>
+                    <TableCell className="text-sm max-w-[200px] truncate">{a.motivo}</TableCell>
+                    <TableCell><StatusBadge status={a.status} /></TableCell>
+                    <TableCell className="text-sm">{a.equipe || "—"}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{formatTime(a.criadoEm)}</TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      {a.status !== "Finalizado" && a.status !== "Cancelado" && <QuickActions activation={a} />}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        )}
       </div>
 
       <DetailModal activation={selected} open={!!selected} onOpenChange={(o) => !o && setSelected(null)} />
+      {timelinePlaca && (
+        <StatusTimeline cavalo={timelinePlaca} open={!!timelinePlaca} onOpenChange={(o) => !o && setTimelinePlaca(null)} />
+      )}
     </div>
   );
 }
