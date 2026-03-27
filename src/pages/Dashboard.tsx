@@ -7,7 +7,7 @@ import { STATUS_LIST } from "@/types/activation";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { BarChart3, Clock, Users, MapPin, Flame } from "lucide-react";
+import { BarChart3 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 const COLORS = ["hsl(50,100%,50%)", "hsl(217,91%,60%)", "hsl(25,95%,53%)", "hsl(280,65%,60%)", "hsl(142,71%,45%)", "hsl(0,84%,60%)", "hsl(180,60%,50%)", "hsl(330,70%,55%)"];
