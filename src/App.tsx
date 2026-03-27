@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import Cadastros from "./pages/Cadastros";
 import LivePanel from "./pages/LivePanel";
 import Mapa from "./pages/Mapa";
+import { AlertSystem } from "@/components/AlertSystem";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
