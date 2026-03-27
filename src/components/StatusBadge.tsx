@@ -15,7 +15,7 @@ export function StatusBadge({ status, className }: { status: ActivationStatus; c
     <span
       className={cn(
         "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold",
-        statusStyles[status],
+        statusStyles[status] || "bg-muted text-muted-foreground",
         status === "Aguardando equipe" && "animate-pulse-soft",
         className
       )}

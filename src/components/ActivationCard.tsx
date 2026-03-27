@@ -19,6 +19,7 @@ export function ActivationCard({ activation, showQuickActions = false }: { activ
   const { items: equipes } = useEquipes();
   const [equipe, setEquipe] = useState<Team | "">(activation.equipe || "");
   const [responsavel, setResponsavel] = useState(activation.responsavel || "");
+  const [pacotes, setPacotes] = useState(String(activation.pacotes || ""));
   const [scriptOpen, setScriptOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const elapsed = useElapsedTime(activation.criadoEm);
@@ -30,7 +31,7 @@ export function ActivationCard({ activation, showQuickActions = false }: { activ
     if (!responsavel.trim()) { toast.error("Digite o responsável"); return; }
     setSaving(true);
     try {
-      await assignTeam(activation.id, equipe as Team, responsavel);
+      await assignTeam(activation.id, equipe as Team, responsavel, Number(pacotes) || 0);
       toast.success("Deslocamento confirmado! ✅");
     } catch {
       toast.error("Erro ao confirmar. Tente novamente.");
@@ -54,7 +55,7 @@ export function ActivationCard({ activation, showQuickActions = false }: { activ
   return (
     <>
       <Card
-        className={`p-5 shadow-sm border-border cursor-pointer hover:border-primary/30 hover:shadow-md transition-all duration-200 ${activation.urgente ? "border-destructive/50 ring-1 ring-destructive/30" : ""}`}
+        className={`p-5 shadow-sm border-border cursor-pointer hover:border-primary/30 hover:shadow-md transition-all duration-200 ${activation.urgente ? "border-destructive/50 ring-1 ring-destructive/30" : ""} ${activation.sinistro ? "border-orange-500/50 ring-1 ring-orange-500/30" : ""}`}
         onClick={() => setScriptOpen(true)}
       >
         <div className="flex items-start justify-between mb-3">
@@ -63,12 +64,15 @@ export function ActivationCard({ activation, showQuickActions = false }: { activ
               <span className="text-xs text-muted-foreground font-mono">Placa</span>
               {activation.urgente && (
                 <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
-                  <AlertTriangle className="h-2.5 w-2.5 mr-0.5" />
-                  URGENTE
+                  <AlertTriangle className="h-2.5 w-2.5 mr-0.5" /> URGENTE
                 </Badge>
+              )}
+              {activation.sinistro && (
+                <Badge className="text-[10px] px-1.5 py-0 bg-orange-600 text-white">SINISTRO</Badge>
               )}
             </div>
             <p className="text-sm font-semibold text-foreground">{activation.cavalo}{activation.carreta ? ` / ${activation.carreta}` : ""}</p>
+            {activation.cidade && <p className="text-[10px] text-primary">📍 {activation.cidade}</p>}
           </div>
           <div className="flex flex-col items-end gap-1">
             <StatusBadge status={activation.status} />
@@ -83,31 +87,22 @@ export function ActivationCard({ activation, showQuickActions = false }: { activ
         {isWaiting && (
           <div className="space-y-2.5" onClick={(e) => e.stopPropagation()}>
             <Select value={equipe} onValueChange={(v) => setEquipe(v as Team)}>
-              <SelectTrigger className="h-8 text-xs">
-                <SelectValue placeholder="Selecionar equipe" />
-              </SelectTrigger>
+              <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Selecionar equipe" /></SelectTrigger>
               <SelectContent>
-                {equipes.map((t) => (
-                  <SelectItem key={t.id} value={t.nome}>{t.nome}</SelectItem>
-                ))}
+                {equipes.map((t) => <SelectItem key={t.id} value={t.nome}>{t.nome}</SelectItem>)}
               </SelectContent>
             </Select>
 
-            <Input
-              value={responsavel}
-              onChange={(e) => setResponsavel(e.target.value)}
-              placeholder="Responsável"
-              className="h-8 text-xs"
-            />
+            <Input value={responsavel} onChange={(e) => setResponsavel(e.target.value)} placeholder="Responsável" className="h-8 text-xs" />
+            
+            <Input type="number" value={pacotes} onChange={(e) => setPacotes(e.target.value)} placeholder="Nº de pacotes" className="h-8 text-xs" />
 
             <div className="flex gap-2">
               <Button size="sm" className="flex-1 h-7 text-xs transition-colors duration-200" onClick={handleConfirm} disabled={saving}>
-                <CheckCircle className="h-3 w-3 mr-1" />
-                {saving ? "Salvando…" : "Confirmar"}
+                <CheckCircle className="h-3 w-3 mr-1" /> {saving ? "Salvando…" : "Confirmar"}
               </Button>
               <Button variant="destructive" size="sm" className="flex-1 h-7 text-xs transition-colors duration-200" onClick={handleCancel} disabled={saving}>
-                <XCircle className="h-3 w-3 mr-1" />
-                Cancelar
+                <XCircle className="h-3 w-3 mr-1" /> Cancelar
               </Button>
             </div>
           </div>
@@ -117,6 +112,7 @@ export function ActivationCard({ activation, showQuickActions = false }: { activ
           <div className="text-xs text-muted-foreground space-y-1">
             <p>Equipe: <span className="font-medium text-foreground">{activation.equipe}</span></p>
             <p>Responsável: <span className="font-medium text-foreground">{activation.responsavel}</span></p>
+            {activation.pacotes > 0 && <p>Pacotes: <span className="font-medium text-foreground">{activation.pacotes}</span></p>}
           </div>
         )}
 
