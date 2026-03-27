@@ -2,7 +2,8 @@ import { useState } from "react";
 import { LayoutDashboard, Siren, History, BarChart3, Settings, Monitor, MapPin, RefreshCw } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { Link } from "react-router-dom";
-import { useActivations } from "@/context/ActivationContext";
+import { useContext } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
