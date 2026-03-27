@@ -12,6 +12,7 @@ interface ActivationContextType {
   updateActivation: (id: string, updates: Partial<Activation>) => void;
   addLog: (activationId: string, acao: string, detalhes?: string) => void;
   getLogs: (activationId: string) => Promise<ActivationLog[]>;
+  refreshData: () => Promise<void>;
 }
 
 const ActivationContext = createContext<ActivationContextType | null>(null);
