@@ -126,7 +126,7 @@ export function DetailModal({ activation, open, onOpenChange }: { activation: Ac
     { key: "motivo", label: "Motivo", type: "select", options: motivos.map((m) => ({ value: m.nome, label: m.nome })) },
     { key: "autorizadoPor", label: "Autorizado por", type: "text" },
     { key: "resumo", label: "Resumo", type: "text" },
-    { key: "equipe", label: "Equipe", type: "select", options: [{ value: "", label: "—" }, ...equipes.map((e) => ({ value: e.nome, label: e.nome }))] },
+    { key: "equipe", label: "Equipe", type: "select", options: [{ value: "__none__", label: "—" }, ...equipes.map((e) => ({ value: e.nome, label: e.nome }))] },
     { key: "responsavel", label: "Responsável", type: "text" },
     { key: "pacotes", label: "Pacotes", type: "number" },
     { key: "status", label: "Status", type: "select", options: STATUS_LIST.map((s) => ({ value: s, label: s })) },
