@@ -53,7 +53,9 @@ export default function Dashboard() {
 
   const byTeam = useMemo(() => {
     const map: Record<string, number> = {};
-    filtered.forEach((a) => { const k = a.equipe || "Sem equipe"; map[k] = (map[k] || 0) + 1; });
+    filtered
+      .filter((a) => a.status !== "Cancelado")
+      .forEach((a) => { const k = a.equipe || "Sem equipe"; map[k] = (map[k] || 0) + 1; });
     return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
   }, [filtered]);
 
