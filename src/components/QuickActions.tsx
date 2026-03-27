@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useActivations } from "@/context/ActivationContext";
 import type { Activation, ActivationStatus } from "@/types/activation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Truck, Shield, Search, CheckCircle, XCircle } from "lucide-react";
@@ -17,13 +16,12 @@ const actions: { status: ActivationStatus; label: string; icon: React.ElementTyp
 ];
 
 export function QuickActions({ activation }: { activation: Activation }) {
-  const { updateStatus, updateActivation } = useActivations();
+  const { updateStatus, updateActivation, addLog } = useActivations();
   const [saving, setSaving] = useState<string | null>(null);
   const [reasonModal, setReasonModal] = useState<{ status: ActivationStatus } | null>(null);
   const [reason, setReason] = useState("");
 
   const handle = async (status: ActivationStatus) => {
-    // Require reason for Finalizado and Cancelado
     if (status === "Finalizado" || status === "Cancelado") {
       setReasonModal({ status });
       setReason("");
@@ -48,10 +46,13 @@ export function QuickActions({ activation }: { activation: Activation }) {
     if (!reasonModal) return;
     setSaving(reasonModal.status);
     try {
+      // Only set observações to the LAST reason (replace, don't accumulate)
       await updateActivation(activation.id, {
         status: reasonModal.status,
-        observacoes: `${activation.observacoes ? activation.observacoes + "\n" : ""}[${reasonModal.status}] ${reason}`,
+        observacoes: `[${reasonModal.status}] ${reason}`,
       });
+      // Log keeps the full history
+      await addLog(activation.id, `${reasonModal.status}`, `Motivo: ${reason}`);
       toast.success("Atualizado com sucesso ✅");
       setReasonModal(null);
     } catch {

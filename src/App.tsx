@@ -10,6 +10,7 @@ import Historico from "./pages/Historico";
 import Dashboard from "./pages/Dashboard";
 import Cadastros from "./pages/Cadastros";
 import LivePanel from "./pages/LivePanel";
+import Mapa from "./pages/Mapa";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/relatorios" element={<Dashboard />} />
             <Route path="/cadastros" element={<Cadastros />} />
             <Route path="/painel" element={<LivePanel />} />
+            <Route path="/mapa" element={<Mapa />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

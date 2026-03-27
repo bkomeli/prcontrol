@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Pencil, Save, X, AlertTriangle, Clock, ScrollText } from "lucide-react";
+import { Pencil, Save, X, AlertTriangle, Clock, ScrollText, MapPin, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { STATUS_LIST } from "@/types/activation";
 
@@ -29,7 +29,6 @@ export function DetailModal({ activation, open, onOpenChange }: { activation: Ac
   const [logs, setLogs] = useState<ActivationLog[]>([]);
   const [showLogs, setShowLogs] = useState(false);
 
-  // Reset form when activation changes or modal opens
   useEffect(() => {
     if (!open || !activation) return;
     setEditing(false);
@@ -63,10 +62,7 @@ export function DetailModal({ activation, open, onOpenChange }: { activation: Ac
     setEditing(true);
   };
 
-  const cancelEdit = () => {
-    setEditing(false);
-    setForm({});
-  };
+  const cancelEdit = () => { setEditing(false); setForm({}); };
 
   const onField = (key: string, value: any) => {
     setForm((prev) => ({
@@ -115,6 +111,11 @@ export function DetailModal({ activation, open, onOpenChange }: { activation: Ac
 
   const formatDate = (iso: string) => new Date(iso).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit" });
 
+  const openGoogleMaps = (latLong: string) => {
+    const [lat, lng] = latLong.split(",").map((s) => s.trim());
+    window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank");
+  };
+
   const editableFields: { key: string; label: string; type: "text" | "select" | "textarea" | "number"; options?: { value: string; label: string }[] }[] = [
     { key: "sm", label: "SM", type: "text" },
     { key: "transportador", label: "Transportador", type: "select", options: transportadoras.map((t) => ({ value: t.nome, label: t.nome })) },
@@ -157,33 +158,16 @@ export function DetailModal({ activation, open, onOpenChange }: { activation: Ac
                 <div key={f.key} className="flex items-start gap-2 text-sm">
                   <span className="text-muted-foreground w-32 shrink-0 pt-2">{f.label}:</span>
                   {f.type === "textarea" ? (
-                    <Textarea
-                      value={form[f.key] || ""}
-                      onChange={(e) => onField(f.key, e.target.value)}
-                      className="text-sm flex-1 min-h-[60px]"
-                    />
+                    <Textarea value={form[f.key] || ""} onChange={(e) => onField(f.key, e.target.value)} className="text-sm flex-1 min-h-[60px]" />
                   ) : f.type === "number" ? (
-                    <Input
-                      type="number"
-                      value={form[f.key] || ""}
-                      onChange={(e) => onField(f.key, e.target.value)}
-                      className="h-8 text-sm flex-1"
-                    />
+                    <Input type="number" value={form[f.key] || ""} onChange={(e) => onField(f.key, e.target.value)} className="h-8 text-sm flex-1" />
                   ) : f.type === "text" ? (
-                    <Input
-                      value={form[f.key] || ""}
-                      onChange={(e) => onField(f.key, e.target.value)}
-                      className="h-8 text-sm flex-1"
-                    />
+                    <Input value={form[f.key] || ""} onChange={(e) => onField(f.key, e.target.value)} className="h-8 text-sm flex-1" />
                   ) : (
                     <Select value={form[f.key] || ""} onValueChange={(v) => onField(f.key, v)}>
-                      <SelectTrigger className="h-8 text-sm flex-1">
-                        <SelectValue />
-                      </SelectTrigger>
+                      <SelectTrigger className="h-8 text-sm flex-1"><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        {f.options?.map((o) => (
-                          <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                        ))}
+                        {f.options?.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   )}
@@ -191,10 +175,7 @@ export function DetailModal({ activation, open, onOpenChange }: { activation: Ac
               ))}
               <div className="flex items-center gap-2 text-sm">
                 <span className="text-muted-foreground w-32 shrink-0">Sinistro:</span>
-                <Checkbox
-                  checked={!!form.sinistro}
-                  onCheckedChange={(c) => onField("sinistro", !!c)}
-                />
+                <Checkbox checked={!!form.sinistro} onCheckedChange={(c) => onField("sinistro", !!c)} />
                 <Label className="text-sm">É sinistro?</Label>
               </div>
               <div className="flex gap-2 pt-2">
@@ -213,7 +194,17 @@ export function DetailModal({ activation, open, onOpenChange }: { activation: Ac
                 return (
                   <div key={f.key} className="flex gap-2 text-sm">
                     <span className="text-muted-foreground w-32 shrink-0">{f.label}:</span>
-                    <span className="text-foreground font-medium">{value}</span>
+                    {f.key === "cidade" && a.cidade && a.latLong ? (
+                      <button
+                        onClick={() => openGoogleMaps(a.latLong)}
+                        className="text-primary font-medium flex items-center gap-1 hover:underline transition-colors duration-200"
+                      >
+                        <MapPin className="h-3 w-3" /> {a.cidade}
+                        <ExternalLink className="h-2.5 w-2.5 opacity-60" />
+                      </button>
+                    ) : (
+                      <span className="text-foreground font-medium">{value}</span>
+                    )}
                   </div>
                 );
               })}
@@ -242,7 +233,6 @@ export function DetailModal({ activation, open, onOpenChange }: { activation: Ac
           </div>
         )}
 
-        {/* Activity Log */}
         <div className="pt-2 border-t border-border">
           <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 w-full" onClick={loadLogs}>
             <ScrollText className="h-3 w-3" /> {showLogs ? "Ocultar Log" : "Ver Log de Alterações"}
