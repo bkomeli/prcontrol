@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { LayoutDashboard, Siren, History, BarChart3, Settings, Monitor, MapPin, RefreshCw } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { Link } from "react-router-dom";
-import { useActivations } from "@/context/ActivationContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -16,21 +15,20 @@ const items = [
   { title: "Painel", url: "/painel", icon: Monitor },
 ];
 
-export function TopNav() {
-  const { refreshData } = useActivations();
+export function TopNav({ onRefresh }: { onRefresh?: () => Promise<void> }) {
   const [refreshing, setRefreshing] = useState(false);
 
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await refreshData();
+      if (onRefresh) await onRefresh();
       toast.success("Dados atualizados!");
     } catch {
       toast.error("Erro ao atualizar dados");
     } finally {
       setTimeout(() => setRefreshing(false), 600);
     }
-  };
+  }, [onRefresh]);
 
   return (
     <nav className="h-14 bg-card border-b border-border flex items-center px-6 shrink-0">
@@ -60,7 +58,7 @@ export function TopNav() {
           onClick={handleRefresh}
           disabled={refreshing}
         >
-          <RefreshCw className={`h-3.5 w-3.5 transition-transform duration-600 ${refreshing ? "animate-spin" : ""}`} />
+          <RefreshCw className={`h-3.5 w-3.5 transition-transform ${refreshing ? "animate-spin" : ""}`} />
           Atualizar
         </Button>
         <span className="text-xs text-muted-foreground">Pronta Resposta Logística</span>
