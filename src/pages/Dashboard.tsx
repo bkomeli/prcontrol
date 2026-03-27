@@ -53,50 +53,7 @@ export default function Dashboard() {
     });
   }, [activations, dateRange, filterStatus, filterEquipe, filterMotivo, filterTransportadora, filterCidade]);
 
-  // Smart metrics
-  const smartMetrics = useMemo(() => {
-    const finished = filtered.filter((a) => a.status === "Finalizado");
-    
-    // Average time per PR (creation to finish)
-    let avgTimePR = 0;
-    if (finished.length > 0) {
-      const totalMs = finished.reduce((sum, a) => {
-        return sum + (new Date(a.atualizadoEm).getTime() - new Date(a.criadoEm).getTime());
-      }, 0);
-      avgTimePR = totalMs / finished.length / (1000 * 60); // minutes
-    }
 
-    // Average time per team
-    const teamTimes: Record<string, { total: number; count: number }> = {};
-    finished.forEach((a) => {
-      const team = a.equipe || "Sem equipe";
-      const mins = (new Date(a.atualizadoEm).getTime() - new Date(a.criadoEm).getTime()) / (1000 * 60);
-      if (!teamTimes[team]) teamTimes[team] = { total: 0, count: 0 };
-      teamTimes[team].total += mins;
-      teamTimes[team].count += 1;
-    });
-    const teamRanking = Object.entries(teamTimes)
-      .map(([name, { total, count }]) => ({ name, avg: Math.round(total / count) }))
-      .sort((a, b) => a.avg - b.avg);
-
-    // Most critical region
-    const cityCount: Record<string, number> = {};
-    filtered.forEach((a) => {
-      const k = a.cidade || "Sem cidade";
-      cityCount[k] = (cityCount[k] || 0) + 1;
-    });
-    const topCity = Object.entries(cityCount).sort((a, b) => b[1] - a[1])[0];
-
-    // Peak hour
-    const hourCount: Record<number, number> = {};
-    filtered.forEach((a) => {
-      const h = new Date(a.criadoEm).getHours();
-      hourCount[h] = (hourCount[h] || 0) + 1;
-    });
-    const peakHour = Object.entries(hourCount).sort((a, b) => Number(b[1]) - Number(a[1]))[0];
-
-    return { avgTimePR, teamRanking, topCity, peakHour };
-  }, [filtered]);
 
   const byTeam = useMemo(() => {
     const map: Record<string, number> = {};
