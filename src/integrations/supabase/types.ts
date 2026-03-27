@@ -14,6 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      activation_logs: {
+        Row: {
+          acao: string
+          activation_id: string
+          criado_em: string | null
+          detalhes: string | null
+          id: string
+        }
+        Insert: {
+          acao: string
+          activation_id: string
+          criado_em?: string | null
+          detalhes?: string | null
+          id?: string
+        }
+        Update: {
+          acao?: string
+          activation_id?: string
+          criado_em?: string | null
+          detalhes?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activation_logs_activation_id_fkey"
+            columns: ["activation_id"]
+            isOneToOne: false
+            referencedRelation: "activations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activations: {
         Row: {
           armado: string
@@ -21,13 +53,17 @@ export type Database = {
           autorizado_por: string
           carreta: string
           cavalo: string
+          cidade: string | null
           criado_em: string
           equipe: string | null
           id: string
           lat_long: string
           motivo: string
+          observacoes: string | null
+          pacotes: number | null
           responsavel: string | null
           resumo: string
+          sinistro: boolean | null
           sm: string
           status: string
           transportador: string
@@ -39,13 +75,17 @@ export type Database = {
           autorizado_por: string
           carreta: string
           cavalo: string
+          cidade?: string | null
           criado_em?: string
           equipe?: string | null
           id?: string
           lat_long: string
           motivo: string
+          observacoes?: string | null
+          pacotes?: number | null
           responsavel?: string | null
           resumo: string
+          sinistro?: boolean | null
           sm: string
           status?: string
           transportador: string
@@ -57,13 +97,17 @@ export type Database = {
           autorizado_por?: string
           carreta?: string
           cavalo?: string
+          cidade?: string | null
           criado_em?: string
           equipe?: string | null
           id?: string
           lat_long?: string
           motivo?: string
+          observacoes?: string | null
+          pacotes?: number | null
           responsavel?: string | null
           resumo?: string
+          sinistro?: boolean | null
           sm?: string
           status?: string
           transportador?: string
