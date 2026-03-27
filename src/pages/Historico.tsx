@@ -19,10 +19,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
 function exportCSV(data: Activation[]) {
-  const headers = ["SM", "Cavalo", "Carreta", "Transportador", "Motivo", "Status", "Equipe", "Responsável", "Armado", "Urgente", "Criado em"];
+  const headers = ["SM", "Cavalo", "Carreta", "Transportador", "Motivo", "Status", "Equipe", "Responsável", "Armado", "Urgente", "Sinistro", "Pacotes", "Cidade", "Observações", "Criado em"];
   const rows = data.map((a) => [
     a.sm, a.cavalo, a.carreta, a.transportador, a.motivo, a.status,
     a.equipe || "", a.responsavel || "", a.armado, a.urgente ? "Sim" : "Não",
+    a.sinistro ? "Sim" : "Não", String(a.pacotes || 0), a.cidade || "", a.observacoes || "",
     new Date(a.criadoEm).toLocaleString("pt-BR"),
   ]);
   const csv = [headers, ...rows].map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
@@ -36,10 +37,11 @@ function exportCSV(data: Activation[]) {
 }
 
 function exportXLS(data: Activation[]) {
-  const headers = ["SM", "Cavalo", "Carreta", "Transportador", "Motivo", "Status", "Equipe", "Responsável", "Armado", "Urgente", "Criado em"];
+  const headers = ["SM", "Cavalo", "Carreta", "Transportador", "Motivo", "Status", "Equipe", "Responsável", "Armado", "Urgente", "Sinistro", "Pacotes", "Cidade", "Observações", "Criado em"];
   const rows = data.map((a) => [
     a.sm, a.cavalo, a.carreta, a.transportador, a.motivo, a.status,
     a.equipe || "", a.responsavel || "", a.armado, a.urgente ? "Sim" : "Não",
+    a.sinistro ? "Sim" : "Não", String(a.pacotes || 0), a.cidade || "", a.observacoes || "",
     new Date(a.criadoEm).toLocaleString("pt-BR"),
   ]);
   let table = "<table><tr>" + headers.map((h) => `<th>${h}</th>`).join("") + "</tr>";
@@ -188,6 +190,7 @@ export default function Historico() {
               <TableRow className="bg-muted/50">
                 {selectMode && <TableHead className="text-xs w-8"></TableHead>}
                 <TableHead className="text-xs w-8"></TableHead>
+                <TableHead className="text-xs w-8"></TableHead>
                 <TableHead className="text-xs">Placa</TableHead>
                 <TableHead className="text-xs">Transportadora</TableHead>
                 <TableHead className="text-xs">Motivo</TableHead>
@@ -200,7 +203,7 @@ export default function Historico() {
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={selectMode ? 9 : 8} className="text-center text-muted-foreground py-8">Nenhum registro encontrado</TableCell>
+                  <TableCell colSpan={selectMode ? 11 : 10} className="text-center text-muted-foreground py-8">Nenhum registro encontrado</TableCell>
                 </TableRow>
               ) : (
                 filtered.map((a) => (
@@ -211,6 +214,7 @@ export default function Historico() {
                       </TableCell>
                     )}
                     <TableCell className="px-3">{a.urgente && <AlertTriangle className="h-3.5 w-3.5 text-destructive" />}</TableCell>
+                    <TableCell className="px-3 text-[10px]">{a.sinistro && <span className="text-orange-500 font-semibold">⚠️</span>}</TableCell>
                     <TableCell className="text-sm font-mono py-3">
                       <button
                         className="hover:underline hover:text-primary transition-colors duration-200 text-left"
