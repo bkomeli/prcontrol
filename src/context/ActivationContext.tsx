@@ -206,7 +206,7 @@ export function ActivationProvider({ children }: { children: React.ReactNode }) 
   }, [activations, addLog]);
 
   return (
-    <ActivationContext.Provider value={{ activations, loading, addActivation, updateStatus, assignTeam, updateActivation, addLog, getLogs }}>
+    <ActivationContext.Provider value={{ activations, loading, addActivation, updateStatus, assignTeam, updateActivation, addLog, getLogs, refreshData: fetchAll }}>
       {children}
     </ActivationContext.Provider>
   );
