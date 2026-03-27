@@ -74,7 +74,6 @@ export function NewActivationForm() {
       { key: "sm", label: "SM" },
       { key: "transportador", label: "Transportador" },
       { key: "cavalo", label: "Cavalo" },
-      { key: "carreta", label: "Carreta" },
       { key: "latLong", label: "Lat / Long" },
       { key: "armado", label: "Armado" },
       { key: "motivo", label: "Motivo" },
