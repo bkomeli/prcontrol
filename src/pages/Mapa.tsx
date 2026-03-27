@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useCallback, useEffect } from "react";
+import { useState, useMemo, useRef, useCallback, useEffect, forwardRef, useImperativeHandle } from "react";
 import { useActivations } from "@/context/ActivationContext";
 import { useDateFilter } from "@/context/DateFilterContext";
 import { useEquipes } from "@/hooks/useCadastros";
@@ -94,9 +94,17 @@ function CenterButton({ positions }: { positions: [number, number][] }) {
 // Heatmap layer component
 function HeatmapLayer({ positions, enabled }: { positions: [number, number][]; enabled: boolean }) {
   const map = useMap();
+  const heatRef = useRef<L.Layer | null>(null);
+
   useEffect(() => {
+    // Remove existing layer first
+    if (heatRef.current) {
+      map.removeLayer(heatRef.current);
+      heatRef.current = null;
+    }
+
     if (!enabled || positions.length === 0) return;
-    // Dynamic import of leaflet.heat
+
     import("leaflet.heat").then(() => {
       const heatData = positions.map(([lat, lng]) => [lat, lng, 1] as [number, number, number]);
       const heat = (L as any).heatLayer(heatData, {
@@ -105,9 +113,17 @@ function HeatmapLayer({ positions, enabled }: { positions: [number, number][]; e
         maxZoom: 12,
         gradient: { 0.2: "#3b82f6", 0.5: "#eab308", 0.8: "#f97316", 1: "#ef4444" },
       }).addTo(map);
-      return () => { map.removeLayer(heat); };
+      heatRef.current = heat;
     });
+
+    return () => {
+      if (heatRef.current) {
+        map.removeLayer(heatRef.current);
+        heatRef.current = null;
+      }
+    };
   }, [map, positions, enabled]);
+
   return null;
 }
 

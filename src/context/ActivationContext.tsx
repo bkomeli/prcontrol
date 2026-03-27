@@ -12,6 +12,7 @@ interface ActivationContextType {
   updateActivation: (id: string, updates: Partial<Activation>) => void;
   addLog: (activationId: string, acao: string, detalhes?: string) => void;
   getLogs: (activationId: string) => Promise<ActivationLog[]>;
+  refreshData: () => Promise<void>;
 }
 
 const ActivationContext = createContext<ActivationContextType | null>(null);
@@ -205,7 +206,7 @@ export function ActivationProvider({ children }: { children: React.ReactNode }) 
   }, [activations, addLog]);
 
   return (
-    <ActivationContext.Provider value={{ activations, loading, addActivation, updateStatus, assignTeam, updateActivation, addLog, getLogs }}>
+    <ActivationContext.Provider value={{ activations, loading, addActivation, updateStatus, assignTeam, updateActivation, addLog, getLogs, refreshData: fetchAll }}>
       {children}
     </ActivationContext.Provider>
   );

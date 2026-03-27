@@ -7,7 +7,7 @@ import { STATUS_LIST } from "@/types/activation";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, Clock, Users, MapPin, Flame } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 const COLORS = ["hsl(50,100%,50%)", "hsl(217,91%,60%)", "hsl(25,95%,53%)", "hsl(280,65%,60%)", "hsl(142,71%,45%)", "hsl(0,84%,60%)", "hsl(180,60%,50%)", "hsl(330,70%,55%)"];
@@ -34,6 +34,7 @@ export default function Dashboard() {
   const [filterMotivo, setFilterMotivo] = useState<string>("all");
   const [filterTransportadora, setFilterTransportadora] = useState<string>("all");
 
+  // Base filtered (respects date + filters) — EXCLUDES Cancelado from all metrics
   const filtered = useMemo(() => {
     const dayStart = dateRange.from ? new Date(dateRange.from) : new Date();
     dayStart.setHours(0, 0, 0, 0);
@@ -42,6 +43,7 @@ export default function Dashboard() {
     return activations.filter((a) => {
       const d = new Date(a.criadoEm);
       if (d < dayStart || d > dayEnd) return false;
+      if (a.status === "Cancelado") return false; // EXCLUDE cancelled
       if (filterStatus !== "all" && a.status !== filterStatus) return false;
       if (filterEquipe !== "all" && a.equipe !== filterEquipe) return false;
       if (filterMotivo !== "all" && a.motivo !== filterMotivo) return false;
@@ -51,11 +53,54 @@ export default function Dashboard() {
     });
   }, [activations, dateRange, filterStatus, filterEquipe, filterMotivo, filterTransportadora, filterCidade]);
 
+  // Smart metrics
+  const smartMetrics = useMemo(() => {
+    const finished = filtered.filter((a) => a.status === "Finalizado");
+    
+    // Average time per PR (creation to finish)
+    let avgTimePR = 0;
+    if (finished.length > 0) {
+      const totalMs = finished.reduce((sum, a) => {
+        return sum + (new Date(a.atualizadoEm).getTime() - new Date(a.criadoEm).getTime());
+      }, 0);
+      avgTimePR = totalMs / finished.length / (1000 * 60); // minutes
+    }
+
+    // Average time per team
+    const teamTimes: Record<string, { total: number; count: number }> = {};
+    finished.forEach((a) => {
+      const team = a.equipe || "Sem equipe";
+      const mins = (new Date(a.atualizadoEm).getTime() - new Date(a.criadoEm).getTime()) / (1000 * 60);
+      if (!teamTimes[team]) teamTimes[team] = { total: 0, count: 0 };
+      teamTimes[team].total += mins;
+      teamTimes[team].count += 1;
+    });
+    const teamRanking = Object.entries(teamTimes)
+      .map(([name, { total, count }]) => ({ name, avg: Math.round(total / count) }))
+      .sort((a, b) => a.avg - b.avg);
+
+    // Most critical region
+    const cityCount: Record<string, number> = {};
+    filtered.forEach((a) => {
+      const k = a.cidade || "Sem cidade";
+      cityCount[k] = (cityCount[k] || 0) + 1;
+    });
+    const topCity = Object.entries(cityCount).sort((a, b) => b[1] - a[1])[0];
+
+    // Peak hour
+    const hourCount: Record<number, number> = {};
+    filtered.forEach((a) => {
+      const h = new Date(a.criadoEm).getHours();
+      hourCount[h] = (hourCount[h] || 0) + 1;
+    });
+    const peakHour = Object.entries(hourCount).sort((a, b) => Number(b[1]) - Number(a[1]))[0];
+
+    return { avgTimePR, teamRanking, topCity, peakHour };
+  }, [filtered]);
+
   const byTeam = useMemo(() => {
     const map: Record<string, number> = {};
-    filtered
-      .filter((a) => a.status !== "Cancelado")
-      .forEach((a) => { const k = a.equipe || "Sem equipe"; map[k] = (map[k] || 0) + 1; });
+    filtered.forEach((a) => { const k = a.equipe || "Sem equipe"; map[k] = (map[k] || 0) + 1; });
     return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
   }, [filtered]);
 
@@ -77,6 +122,13 @@ export default function Dashboard() {
     return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
   }, [filtered]);
 
+  const formatMinutes = (mins: number) => {
+    if (mins < 60) return `${Math.round(mins)}min`;
+    const h = Math.floor(mins / 60);
+    const m = Math.round(mins % 60);
+    return `${h}h${m > 0 ? `${m}min` : ""}`;
+  };
+
   return (
     <div className="p-6 animate-fade-in">
       <div className="flex items-center gap-3 mb-4">
@@ -87,18 +139,22 @@ export default function Dashboard() {
             {filtered.length} acionamentos
           </span>
         </h1>
-        <div className="ml-auto">
-          <DateFilter range={dateRange} onChange={setDateRange} />
-        </div>
       </div>
 
-      {/* Advanced filters */}
+      {/* Filters row — period + city side by side */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
+        <DateFilter range={dateRange} onChange={setDateRange} />
+        <Input
+          value={filterCidade}
+          onChange={(e) => setFilterCidade(e.target.value)}
+          placeholder="Filtrar cidade..."
+          className="h-8 w-36 text-sm"
+        />
         <Select value={filterStatus} onValueChange={setFilterStatus}>
           <SelectTrigger className="h-8 w-40 text-sm"><SelectValue placeholder="Status" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos status</SelectItem>
-            {STATUS_LIST.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+            {STATUS_LIST.filter((s) => s !== "Cancelado").map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={filterEquipe} onValueChange={setFilterEquipe}>
@@ -122,12 +178,55 @@ export default function Dashboard() {
             {transportadoras.map((t) => <SelectItem key={t.id} value={t.nome}>{t.nome}</SelectItem>)}
           </SelectContent>
         </Select>
-        <Input
-          value={filterCidade}
-          onChange={(e) => setFilterCidade(e.target.value)}
-          placeholder="Filtrar cidade..."
-          className="h-8 w-36 text-sm"
-        />
+      </div>
+
+      {/* Smart metrics cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <Card className="p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <Clock className="h-4 w-4 text-primary" />
+            <span className="text-xs text-muted-foreground">Tempo médio por PR</span>
+          </div>
+          <p className="text-lg font-bold text-foreground">
+            {smartMetrics.avgTimePR > 0 ? formatMinutes(smartMetrics.avgTimePR) : "—"}
+          </p>
+        </Card>
+        <Card className="p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <Users className="h-4 w-4 text-primary" />
+            <span className="text-xs text-muted-foreground">Equipe mais rápida</span>
+          </div>
+          <p className="text-lg font-bold text-foreground">
+            {smartMetrics.teamRanking[0] ? `${smartMetrics.teamRanking[0].name}` : "—"}
+          </p>
+          {smartMetrics.teamRanking[0] && (
+            <p className="text-xs text-muted-foreground">{formatMinutes(smartMetrics.teamRanking[0].avg)} em média</p>
+          )}
+        </Card>
+        <Card className="p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <MapPin className="h-4 w-4 text-destructive" />
+            <span className="text-xs text-muted-foreground">Região mais crítica</span>
+          </div>
+          <p className="text-lg font-bold text-foreground">
+            {smartMetrics.topCity ? smartMetrics.topCity[0] : "—"}
+          </p>
+          {smartMetrics.topCity && (
+            <p className="text-xs text-muted-foreground">{smartMetrics.topCity[1]} PRs</p>
+          )}
+        </Card>
+        <Card className="p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <Flame className="h-4 w-4 text-orange-400" />
+            <span className="text-xs text-muted-foreground">Pico de ocorrências</span>
+          </div>
+          <p className="text-lg font-bold text-foreground">
+            {smartMetrics.peakHour ? `${smartMetrics.peakHour[0]}h` : "—"}
+          </p>
+          {smartMetrics.peakHour && (
+            <p className="text-xs text-muted-foreground">{smartMetrics.peakHour[1]} acionamentos</p>
+          )}
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -186,6 +285,23 @@ export default function Dashboard() {
             </ResponsiveContainer>
           )}
         </Card>
+
+        {/* Team efficiency ranking */}
+        {smartMetrics.teamRanking.length > 0 && (
+          <Card className="p-6 transition-shadow duration-200 hover:shadow-lg col-span-1 lg:col-span-2">
+            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+              <Users className="h-4 w-4 text-primary" /> Ranking de eficiência por equipe
+            </h3>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={smartMetrics.teamRanking} layout="vertical">
+                <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} unit="min" />
+                <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 12, fill: "hsl(var(--foreground))" }} />
+                <Tooltip content={<CustomTooltip metricLabel="Tempo médio (min)" />} />
+                <Bar dataKey="avg" fill="hsl(142,71%,45%)" radius={[0, 4, 4, 0]} animationDuration={600} />
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+        )}
       </div>
     </div>
   );

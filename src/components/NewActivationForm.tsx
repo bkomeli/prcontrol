@@ -111,16 +111,7 @@ Breve resumo: ${form.resumo || "—"}${sinistro ? "\n⚠️ SINISTRO" : ""}`;
     toast.success("PR criada! Script copiado automaticamente.");
   }, [form, urgente, sinistro, addActivation]);
 
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Enter" && !e.shiftKey && (e.target as HTMLElement)?.tagName !== "TEXTAREA") {
-        e.preventDefault();
-        handleSubmit();
-      }
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [handleSubmit]);
+  // ENTER key no longer submits the form - only the button does
 
   return (
     <Card className="p-5 shadow-sm border-border">

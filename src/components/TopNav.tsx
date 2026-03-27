@@ -1,6 +1,10 @@
-import { LayoutDashboard, Siren, History, BarChart3, Settings, Monitor, MapPin } from "lucide-react";
+import { useState } from "react";
+import { LayoutDashboard, Siren, History, BarChart3, Settings, Monitor, MapPin, RefreshCw } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { Link } from "react-router-dom";
+import { useActivations } from "@/context/ActivationContext";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
@@ -13,6 +17,21 @@ const items = [
 ];
 
 export function TopNav() {
+  const { refreshData } = useActivations();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await refreshData();
+      toast.success("Dados atualizados!");
+    } catch {
+      toast.error("Erro ao atualizar dados");
+    } finally {
+      setTimeout(() => setRefreshing(false), 600);
+    }
+  };
+
   return (
     <nav className="h-14 bg-card border-b border-border flex items-center px-6 shrink-0">
       <Link to="/" className="text-base font-bold tracking-tight mr-8 hover:opacity-80 transition-opacity duration-200">
@@ -33,7 +52,17 @@ export function TopNav() {
           </NavLink>
         ))}
       </div>
-      <div className="ml-auto">
+      <div className="ml-auto flex items-center gap-3">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 text-xs gap-1.5"
+          onClick={handleRefresh}
+          disabled={refreshing}
+        >
+          <RefreshCw className={`h-3.5 w-3.5 transition-transform duration-600 ${refreshing ? "animate-spin" : ""}`} />
+          Atualizar
+        </Button>
         <span className="text-xs text-muted-foreground">Pronta Resposta Logística</span>
       </div>
     </nav>
