@@ -9,13 +9,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Zap, AlertTriangle } from "lucide-react";
+import { Zap, AlertTriangle, MapPin, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
 const initialForm = {
   sm: "", transportador: "", cavalo: "", carreta: "",
   latLong: "", armado: "AMBOS", motivo: "", autorizadoPor: "", resumo: "",
-  observacoes: "", cidade: "",
+  cidade: "",
 };
 
 async function reverseGeocode(latLong: string): Promise<string> {
@@ -36,6 +36,7 @@ export function NewActivationForm() {
   const [form, setForm] = useState(initialForm);
   const [urgente, setUrgente] = useState(false);
   const [sinistro, setSinistro] = useState(false);
+  const [geocoding, setGeocoding] = useState(false);
   const { addActivation } = useActivations();
   const { items: transportadoras } = useTransportadoras();
   const { items: motivos } = useMotivos();
@@ -53,16 +54,36 @@ export function NewActivationForm() {
   // Auto reverse geocode
   useEffect(() => {
     if (!form.latLong || form.latLong.split(",").length < 2) return;
+    setGeocoding(true);
     const timeout = setTimeout(async () => {
       const cidade = await reverseGeocode(form.latLong);
       if (cidade) setForm((prev) => ({ ...prev, cidade }));
+      setGeocoding(false);
     }, 800);
-    return () => clearTimeout(timeout);
+    return () => { clearTimeout(timeout); setGeocoding(false); };
   }, [form.latLong]);
 
+  const openGoogleMaps = () => {
+    if (!form.latLong) return;
+    const [lat, lng] = form.latLong.split(",").map((s) => s.trim());
+    window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank");
+  };
+
   const handleSubmit = useCallback(() => {
-    if (!form.sm || !form.motivo) {
-      toast.error("SM e Motivo são obrigatórios");
+    const requiredFields = [
+      { key: "sm", label: "SM" },
+      { key: "transportador", label: "Transportador" },
+      { key: "cavalo", label: "Cavalo" },
+      { key: "carreta", label: "Carreta" },
+      { key: "latLong", label: "Lat / Long" },
+      { key: "armado", label: "Armado" },
+      { key: "motivo", label: "Motivo" },
+      { key: "autorizadoPor", label: "Autorizado por" },
+    ];
+
+    const missing = requiredFields.filter((f) => !form[f.key as keyof typeof form]?.trim());
+    if (missing.length > 0) {
+      toast.error(`Campos obrigatórios: ${missing.map((f) => f.label).join(", ")}`);
       return;
     }
 
@@ -74,11 +95,12 @@ Lat / long: ${form.latLong}${form.cidade ? ` (${form.cidade})` : ""}
 Armado? ${form.armado}
 Motivo do acionamento: ${form.motivo}
 Autorizado por quem? ${form.autorizadoPor}
-Breve resumo: ${form.resumo}${sinistro ? "\n⚠️ SINISTRO" : ""}`;
+Breve resumo: ${form.resumo || "—"}${sinistro ? "\n⚠️ SINISTRO" : ""}`;
 
     navigator.clipboard.writeText(script);
     addActivation({
       ...form,
+      observacoes: "",
       urgente,
       sinistro,
       pacotes: 0,
@@ -109,31 +131,42 @@ Breve resumo: ${form.resumo}${sinistro ? "\n⚠️ SINISTRO" : ""}`;
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <Label className="text-xs font-medium text-muted-foreground">SM</Label>
+          <Label className="text-xs font-medium text-muted-foreground">SM *</Label>
           <Input value={form.sm} onChange={set("sm")} placeholder="Número da SM" className="mt-1 h-8 text-sm" />
         </div>
         <div>
-          <Label className="text-xs font-medium text-muted-foreground">Lat / Long</Label>
+          <Label className="text-xs font-medium text-muted-foreground">Lat / Long *</Label>
           <Input value={form.latLong} onChange={set("latLong")} placeholder="-23.5505, -46.6333" className="mt-1 h-8 text-sm" />
         </div>
 
-        {form.cidade && (
+        {(form.cidade || geocoding) && (
           <div className="col-span-2">
-            <span className="text-xs text-primary font-medium">📍 {form.cidade}</span>
+            {geocoding ? (
+              <span className="text-xs text-muted-foreground">Identificando cidade...</span>
+            ) : (
+              <button
+                type="button"
+                onClick={openGoogleMaps}
+                className="text-xs text-primary font-medium flex items-center gap-1 hover:underline transition-colors duration-200 cursor-pointer"
+              >
+                <MapPin className="h-3 w-3" /> {form.cidade}
+                <ExternalLink className="h-2.5 w-2.5 opacity-60" />
+              </button>
+            )}
           </div>
         )}
 
         <div>
-          <Label className="text-xs font-medium text-muted-foreground">Cavalo</Label>
+          <Label className="text-xs font-medium text-muted-foreground">Cavalo *</Label>
           <Input value={form.cavalo} onChange={set("cavalo")} placeholder="Placa do cavalo" className="mt-1 h-8 text-sm" />
         </div>
         <div>
-          <Label className="text-xs font-medium text-muted-foreground">Carreta</Label>
+          <Label className="text-xs font-medium text-muted-foreground">Carreta *</Label>
           <Input value={form.carreta} onChange={set("carreta")} placeholder="Placa da carreta" className="mt-1 h-8 text-sm" />
         </div>
 
         <div>
-          <Label className="text-xs font-medium text-muted-foreground">Transportador</Label>
+          <Label className="text-xs font-medium text-muted-foreground">Transportador *</Label>
           <Select value={form.transportador} onValueChange={(v) => setField("transportador", v)}>
             <SelectTrigger className="mt-1 h-8 text-sm"><SelectValue placeholder="Selecionar" /></SelectTrigger>
             <SelectContent>
@@ -142,7 +175,7 @@ Breve resumo: ${form.resumo}${sinistro ? "\n⚠️ SINISTRO" : ""}`;
           </Select>
         </div>
         <div>
-          <Label className="text-xs font-medium text-muted-foreground">Armado</Label>
+          <Label className="text-xs font-medium text-muted-foreground">Armado *</Label>
           <Select value={form.armado} onValueChange={(v) => setField("armado", v)}>
             <SelectTrigger className="mt-1 h-8 text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -154,12 +187,12 @@ Breve resumo: ${form.resumo}${sinistro ? "\n⚠️ SINISTRO" : ""}`;
         </div>
 
         <div className="col-span-2">
-          <Label className="text-xs font-medium text-muted-foreground">Autorizado por quem</Label>
+          <Label className="text-xs font-medium text-muted-foreground">Autorizado por quem *</Label>
           <Input value={form.autorizadoPor} onChange={set("autorizadoPor")} placeholder="Nome do autorizador" className="mt-1 h-8 text-sm" />
         </div>
 
         <div className="col-span-2">
-          <Label className="text-xs font-medium text-muted-foreground">Motivo do acionamento</Label>
+          <Label className="text-xs font-medium text-muted-foreground">Motivo do acionamento *</Label>
           <Select value={form.motivo} onValueChange={(v) => setField("motivo", v)}>
             <SelectTrigger className="mt-1 h-8 text-sm"><SelectValue placeholder="Selecionar motivo" /></SelectTrigger>
             <SelectContent>
@@ -169,13 +202,8 @@ Breve resumo: ${form.resumo}${sinistro ? "\n⚠️ SINISTRO" : ""}`;
         </div>
 
         <div className="col-span-2">
-          <Label className="text-xs font-medium text-muted-foreground">Breve resumo</Label>
+          <Label className="text-xs font-medium text-muted-foreground">Breve resumo (opcional)</Label>
           <Textarea value={form.resumo} onChange={set("resumo")} placeholder="Resumo da situação" className="mt-1 text-sm min-h-[60px]" />
-        </div>
-
-        <div className="col-span-2">
-          <Label className="text-xs font-medium text-muted-foreground">Observações</Label>
-          <Textarea value={form.observacoes} onChange={set("observacoes")} placeholder="Observações adicionais (opcional)" className="mt-1 text-sm min-h-[40px]" />
         </div>
 
         <div className="col-span-2 flex items-center gap-4">

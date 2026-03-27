@@ -1,4 +1,4 @@
-import { LayoutDashboard, Siren, History, BarChart3, Settings, Monitor } from "lucide-react";
+import { LayoutDashboard, Siren, History, BarChart3, Settings, Monitor, MapPin } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { Link } from "react-router-dom";
 
@@ -6,6 +6,7 @@ const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "PR Ativas", url: "/pr-ativas", icon: Siren },
   { title: "Histórico", url: "/historico", icon: History },
+  { title: "Mapa", url: "/mapa", icon: MapPin },
   { title: "Relatórios", url: "/relatorios", icon: BarChart3 },
   { title: "Cadastros", url: "/cadastros", icon: Settings },
   { title: "Painel", url: "/painel", icon: Monitor },
