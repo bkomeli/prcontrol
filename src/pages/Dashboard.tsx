@@ -192,22 +192,6 @@ export default function Dashboard() {
           )}
         </Card>
 
-        {/* Team efficiency ranking */}
-        {smartMetrics.teamRanking.length > 0 && (
-          <Card className="p-6 transition-shadow duration-200 hover:shadow-lg col-span-1 lg:col-span-2">
-            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
-              <Users className="h-4 w-4 text-primary" /> Ranking de eficiência por equipe
-            </h3>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={smartMetrics.teamRanking} layout="vertical">
-                <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} unit="min" />
-                <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 12, fill: "hsl(var(--foreground))" }} />
-                <Tooltip content={<CustomTooltip metricLabel="Tempo médio (min)" />} />
-                <Bar dataKey="avg" fill="hsl(142,71%,45%)" radius={[0, 4, 4, 0]} animationDuration={600} />
-              </BarChart>
-            </ResponsiveContainer>
-          </Card>
-        )}
       </div>
     </div>
   );
