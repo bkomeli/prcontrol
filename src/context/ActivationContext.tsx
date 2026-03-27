@@ -65,7 +65,8 @@ export function ActivationProvider({ children }: { children: React.ReactNode }) 
     const { data } = await supabase
       .from("activations")
       .select("*")
-      .order("criado_em", { ascending: false });
+      .order("criado_em", { ascending: false })
+      .limit(5000);
     if (data) {
       const mapped = data.map(mapRow);
       setActivations((prev) => {

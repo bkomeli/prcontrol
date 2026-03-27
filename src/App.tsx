@@ -23,6 +23,7 @@ const App = () => (
       <Sonner />
       <div className="min-h-screen flex flex-col w-full">
         <TopNav />
+        <AlertSystem />
         <main className="flex-1 overflow-auto">
           <Routes>
             <Route path="/" element={<Index />} />
