@@ -133,54 +133,7 @@ export default function Dashboard() {
         </Select>
       </div>
 
-      {/* Smart metrics cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card className="p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <Clock className="h-4 w-4 text-primary" />
-            <span className="text-xs text-muted-foreground">Tempo médio por PR</span>
-          </div>
-          <p className="text-lg font-bold text-foreground">
-            {smartMetrics.avgTimePR > 0 ? formatMinutes(smartMetrics.avgTimePR) : "—"}
-          </p>
-        </Card>
-        <Card className="p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <Users className="h-4 w-4 text-primary" />
-            <span className="text-xs text-muted-foreground">Equipe mais rápida</span>
-          </div>
-          <p className="text-lg font-bold text-foreground">
-            {smartMetrics.teamRanking[0] ? `${smartMetrics.teamRanking[0].name}` : "—"}
-          </p>
-          {smartMetrics.teamRanking[0] && (
-            <p className="text-xs text-muted-foreground">{formatMinutes(smartMetrics.teamRanking[0].avg)} em média</p>
-          )}
-        </Card>
-        <Card className="p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <MapPin className="h-4 w-4 text-destructive" />
-            <span className="text-xs text-muted-foreground">Região mais crítica</span>
-          </div>
-          <p className="text-lg font-bold text-foreground">
-            {smartMetrics.topCity ? smartMetrics.topCity[0] : "—"}
-          </p>
-          {smartMetrics.topCity && (
-            <p className="text-xs text-muted-foreground">{smartMetrics.topCity[1]} PRs</p>
-          )}
-        </Card>
-        <Card className="p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <Flame className="h-4 w-4 text-orange-400" />
-            <span className="text-xs text-muted-foreground">Pico de ocorrências</span>
-          </div>
-          <p className="text-lg font-bold text-foreground">
-            {smartMetrics.peakHour ? `${smartMetrics.peakHour[0]}h` : "—"}
-          </p>
-          {smartMetrics.peakHour && (
-            <p className="text-xs text-muted-foreground">{smartMetrics.peakHour[1]} acionamentos</p>
-          )}
-        </Card>
-      </div>
+
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="p-6 transition-shadow duration-200 hover:shadow-lg">
