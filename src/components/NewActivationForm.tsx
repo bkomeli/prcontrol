@@ -151,7 +151,7 @@ Breve resumo: ${form.resumo || "—"}${sinistro ? "\n⚠️ SINISTRO" : ""}`;
           <Input value={form.cavalo} onChange={set("cavalo")} placeholder="Placa do cavalo" className="mt-1 h-8 text-sm" />
         </div>
         <div>
-          <Label className="text-xs font-medium text-muted-foreground">Carreta *</Label>
+          <Label className="text-xs font-medium text-muted-foreground">Carreta</Label>
           <Input value={form.carreta} onChange={set("carreta")} placeholder="Placa da carreta" className="mt-1 h-8 text-sm" />
         </div>
 
