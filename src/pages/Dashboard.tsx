@@ -79,12 +79,8 @@ export default function Dashboard() {
     return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
   }, [filtered]);
 
-  const formatMinutes = (mins: number) => {
-    if (mins < 60) return `${Math.round(mins)}min`;
-    const h = Math.floor(mins / 60);
-    const m = Math.round(mins % 60);
-    return `${h}h${m > 0 ? `${m}min` : ""}`;
-  };
+
+
 
   return (
     <div className="p-6 animate-fade-in">
