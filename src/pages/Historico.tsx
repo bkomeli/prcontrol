@@ -203,7 +203,7 @@ export default function Historico() {
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={selectMode ? 9 : 8} className="text-center text-muted-foreground py-8">Nenhum registro encontrado</TableCell>
+                  <TableCell colSpan={selectMode ? 11 : 10} className="text-center text-muted-foreground py-8">Nenhum registro encontrado</TableCell>
                 </TableRow>
               ) : (
                 filtered.map((a) => (
