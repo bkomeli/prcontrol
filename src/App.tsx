@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import Cadastros from "./pages/Cadastros";
 import LivePanel from "./pages/LivePanel";
 import Mapa from "./pages/Mapa";
+import { AlertSystem } from "@/components/AlertSystem";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
       <Sonner />
       <div className="min-h-screen flex flex-col w-full">
         <TopNav />
+        <AlertSystem />
         <main className="flex-1 overflow-auto">
           <Routes>
             <Route path="/" element={<Index />} />
