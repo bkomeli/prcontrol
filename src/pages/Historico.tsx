@@ -214,6 +214,7 @@ export default function Historico() {
                       </TableCell>
                     )}
                     <TableCell className="px-3">{a.urgente && <AlertTriangle className="h-3.5 w-3.5 text-destructive" />}</TableCell>
+                    <TableCell className="px-3 text-[10px]">{a.sinistro && <span className="text-orange-500 font-semibold">⚠️</span>}</TableCell>
                     <TableCell className="text-sm font-mono py-3">
                       <button
                         className="hover:underline hover:text-primary transition-colors duration-200 text-left"
