@@ -89,7 +89,7 @@ export function DetailModal({ activation, open, onOpenChange }: { activation: Ac
         motivo: form.motivo,
         autorizadoPor: form.autorizadoPor,
         resumo: form.resumo,
-        equipe: form.equipe || undefined,
+        equipe: form.equipe === "__none__" ? undefined : form.equipe || undefined,
         responsavel: form.responsavel || undefined,
         status: form.status as any,
         observacoes: form.observacoes,
