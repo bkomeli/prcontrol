@@ -52,7 +52,7 @@ export function DetailModal({ activation, open, onOpenChange }: { activation: Ac
       motivo: a.motivo,
       autorizadoPor: a.autorizadoPor,
       resumo: a.resumo,
-      equipe: a.equipe || "",
+      equipe: a.equipe || "__none__",
       responsavel: a.responsavel || "",
       status: a.status,
       observacoes: a.observacoes || "",
