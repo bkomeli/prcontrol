@@ -60,6 +60,7 @@ export type Database = {
           lat_long: string
           motivo: string
           observacoes: string | null
+          origem: string | null
           pacotes: number | null
           responsavel: string | null
           resumo: string
@@ -67,6 +68,7 @@ export type Database = {
           sm: string
           status: string
           transportador: string
+          type: string
           urgente: boolean
         }
         Insert: {
@@ -82,6 +84,7 @@ export type Database = {
           lat_long: string
           motivo: string
           observacoes?: string | null
+          origem?: string | null
           pacotes?: number | null
           responsavel?: string | null
           resumo: string
@@ -89,6 +92,7 @@ export type Database = {
           sm: string
           status?: string
           transportador: string
+          type?: string
           urgente?: boolean
         }
         Update: {
@@ -104,6 +108,7 @@ export type Database = {
           lat_long?: string
           motivo?: string
           observacoes?: string | null
+          origem?: string | null
           pacotes?: number | null
           responsavel?: string | null
           resumo?: string
@@ -111,6 +116,7 @@ export type Database = {
           sm?: string
           status?: string
           transportador?: string
+          type?: string
           urgente?: boolean
         }
         Relationships: []
@@ -168,6 +174,50 @@ export type Database = {
           nome?: string
         }
         Relationships: []
+      }
+      vehicles: {
+        Row: {
+          activation_id: string
+          criado_em: string
+          destino: string | null
+          id: string
+          placa_carreta: string | null
+          placa_cavalo: string | null
+          sm: string
+          status: string | null
+          transportadora: string | null
+        }
+        Insert: {
+          activation_id: string
+          criado_em?: string
+          destino?: string | null
+          id?: string
+          placa_carreta?: string | null
+          placa_cavalo?: string | null
+          sm: string
+          status?: string | null
+          transportadora?: string | null
+        }
+        Update: {
+          activation_id?: string
+          criado_em?: string
+          destino?: string | null
+          id?: string
+          placa_carreta?: string | null
+          placa_cavalo?: string | null
+          sm?: string
+          status?: string | null
+          transportadora?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicles_activation_id_fkey"
+            columns: ["activation_id"]
+            isOneToOne: false
+            referencedRelation: "activations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
