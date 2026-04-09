@@ -103,6 +103,7 @@ Breve resumo: ${form.resumo || "—"}${sinistro ? "\n⚠️ SINISTRO" : ""}`;
       urgente,
       sinistro,
       pacotes: 0,
+      plantao: "",
     });
     setForm(initialForm);
     setUrgente(false);
