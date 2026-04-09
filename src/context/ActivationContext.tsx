@@ -58,6 +58,7 @@ function sendNotification(title: string, body: string) {
 }
 
 export function ActivationProvider({ children }: { children: React.ReactNode }) {
+  console.log("[ActivationProvider] rendering");
   const [activations, setActivations] = useState<Activation[]>([]);
   const [loading, setLoading] = useState(true);
   const prevCountRef = useRef(0);
