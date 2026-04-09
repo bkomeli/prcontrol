@@ -33,6 +33,7 @@ export interface Activation {
   sinistro: boolean;
   pacotes: number;
   cidade: string;
+  plantao: string;
 }
 
 export interface ActivationLog {
