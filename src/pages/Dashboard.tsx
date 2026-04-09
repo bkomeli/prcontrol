@@ -141,8 +141,8 @@ export default function Dashboard() {
             {transportadoras.map((t) => <SelectItem key={t.id} value={t.nome}>{t.nome}</SelectItem>)}
           </SelectContent>
         </Select>
+        </div>
       </div>
-
 
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
