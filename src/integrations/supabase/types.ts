@@ -62,6 +62,7 @@ export type Database = {
           observacoes: string | null
           origem: string | null
           pacotes: number | null
+          plantao: string | null
           responsavel: string | null
           resumo: string
           sinistro: boolean | null
@@ -86,6 +87,7 @@ export type Database = {
           observacoes?: string | null
           origem?: string | null
           pacotes?: number | null
+          plantao?: string | null
           responsavel?: string | null
           resumo: string
           sinistro?: boolean | null
@@ -110,6 +112,7 @@ export type Database = {
           observacoes?: string | null
           origem?: string | null
           pacotes?: number | null
+          plantao?: string | null
           responsavel?: string | null
           resumo?: string
           sinistro?: boolean | null

@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useActivations } from "@/context/ActivationContext";
 import { useTransportadoras } from "@/hooks/useCadastros";
+import { getPlantao } from "@/utils/plantao";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -85,7 +86,7 @@ export function NewEscoltaForm() {
       return;
     }
 
-    // Create activation record
+    const plantao = getPlantao().equipe;
     const now = new Date().toISOString();
     const { data: inserted, error } = await supabase.from("activations").insert({
       sm: vehicles.map((v) => v.sm).join(", "),
@@ -104,6 +105,7 @@ export function NewEscoltaForm() {
       cidade: cidade,
       type: "escolta",
       origem: origem,
+      plantao,
     } as any).select().single();
 
     if (error || !inserted) {

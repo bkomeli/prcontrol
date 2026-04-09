@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect, use
 import { supabase } from "@/integrations/supabase/client";
 import type { Activation, ActivationStatus, Team, ActivationLog } from "@/types/activation";
 import { SINISTRO_MOTIVOS } from "@/types/activation";
+import { getPlantao } from "@/utils/plantao";
 
 interface ActivationContextType {
   activations: Activation[];
@@ -39,6 +40,7 @@ function mapRow(row: any): Activation {
     sinistro: row.sinistro ?? false,
     pacotes: row.pacotes ?? 0,
     cidade: row.cidade ?? "",
+    plantao: row.plantao ?? "",
   };
 }
 
@@ -122,6 +124,7 @@ export function ActivationProvider({ children }: { children: React.ReactNode }) 
   const addActivation = useCallback(async (data: Omit<Activation, "id" | "status" | "criadoEm" | "atualizadoEm">) => {
     const now = new Date().toISOString();
     const sinistro = data.sinistro || SINISTRO_MOTIVOS.has(data.motivo.toUpperCase());
+    const plantao = getPlantao().equipe;
     const optimistic: Activation = {
       ...data,
       id: crypto.randomUUID(),
@@ -129,6 +132,7 @@ export function ActivationProvider({ children }: { children: React.ReactNode }) 
       criadoEm: now,
       atualizadoEm: now,
       sinistro,
+      plantao,
     };
     setActivations((prev) => [optimistic, ...prev]);
 
@@ -147,6 +151,7 @@ export function ActivationProvider({ children }: { children: React.ReactNode }) 
       sinistro,
       pacotes: data.pacotes || 0,
       cidade: data.cidade || "",
+      plantao,
     } as any).select().single();
 
     if (inserted) {
@@ -193,6 +198,7 @@ export function ActivationProvider({ children }: { children: React.ReactNode }) 
     if (updates.sinistro !== undefined) dbUpdates.sinistro = updates.sinistro;
     if (updates.pacotes !== undefined) dbUpdates.pacotes = updates.pacotes;
     if (updates.cidade !== undefined) dbUpdates.cidade = updates.cidade;
+    if (updates.plantao !== undefined) dbUpdates.plantao = updates.plantao;
     await supabase.from("activations").update(dbUpdates as any).eq("id", id);
 
     // Build log details
