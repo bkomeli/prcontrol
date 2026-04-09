@@ -103,6 +103,7 @@ export default function Dashboard() {
           <Shield className="h-4 w-4 text-primary" />
           <span className="text-sm font-medium text-foreground">Plantão: <strong>{plantaoLabel}</strong></span>
         </div>
+      </div>
 
       {/* Filters row — period + city side by side */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
