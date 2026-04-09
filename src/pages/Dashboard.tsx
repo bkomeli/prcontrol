@@ -142,7 +142,6 @@ export default function Dashboard() {
             {transportadoras.map((t) => <SelectItem key={t.id} value={t.nome}>{t.nome}</SelectItem>)}
           </SelectContent>
         </Select>
-        </div>
       </div>
 
 
