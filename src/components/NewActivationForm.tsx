@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useActivations } from "@/context/ActivationContext";
 import { useTransportadoras, useMotivos } from "@/hooks/useCadastros";
 import { SINISTRO_MOTIVOS } from "@/types/activation";
+import { getPlantaoLabel } from "@/utils/plantao";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Zap, AlertTriangle, MapPin, ExternalLink } from "lucide-react";
+import { Zap, AlertTriangle, MapPin, ExternalLink, Shield } from "lucide-react";
 import { toast } from "sonner";
 
 const initialForm = {
@@ -115,10 +116,16 @@ Breve resumo: ${form.resumo || "—"}${sinistro ? "\n⚠️ SINISTRO" : ""}`;
 
   return (
     <Card className="p-5 shadow-sm border-border">
-      <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-        <Zap className="h-5 w-5 text-primary" />
-        Novo Acionamento
-      </h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+          <Zap className="h-5 w-5 text-primary" />
+          Novo Acionamento
+        </h2>
+        <div className="flex items-center gap-1.5 bg-accent/50 rounded px-2 py-1">
+          <Shield className="h-3.5 w-3.5 text-primary" />
+          <span className="text-xs font-medium text-foreground">{getPlantaoLabel()}</span>
+        </div>
+      </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div>

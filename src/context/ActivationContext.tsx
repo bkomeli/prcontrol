@@ -198,6 +198,7 @@ export function ActivationProvider({ children }: { children: React.ReactNode }) 
     if (updates.sinistro !== undefined) dbUpdates.sinistro = updates.sinistro;
     if (updates.pacotes !== undefined) dbUpdates.pacotes = updates.pacotes;
     if (updates.cidade !== undefined) dbUpdates.cidade = updates.cidade;
+    if (updates.plantao !== undefined) dbUpdates.plantao = updates.plantao;
     await supabase.from("activations").update(dbUpdates as any).eq("id", id);
 
     // Build log details
