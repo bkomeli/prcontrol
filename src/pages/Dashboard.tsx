@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useActivations } from "@/context/ActivationContext";
 import { useDateFilter } from "@/context/DateFilterContext";
 import { useEquipes, useTransportadoras, useMotivos } from "@/hooks/useCadastros";
@@ -7,8 +7,9 @@ import { STATUS_LIST } from "@/types/activation";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, Shield } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { getPlantaoLabel } from "@/utils/plantao";
 
 const COLORS = ["hsl(50,100%,50%)", "hsl(217,91%,60%)", "hsl(25,95%,53%)", "hsl(280,65%,60%)", "hsl(142,71%,45%)", "hsl(0,84%,60%)", "hsl(180,60%,50%)", "hsl(330,70%,55%)"];
 
@@ -33,7 +34,13 @@ export default function Dashboard() {
   const [filterCidade, setFilterCidade] = useState("");
   const [filterMotivo, setFilterMotivo] = useState<string>("all");
   const [filterTransportadora, setFilterTransportadora] = useState<string>("all");
+  const [plantaoLabel, setPlantaoLabel] = useState(getPlantaoLabel());
 
+  // Update plantão label every minute
+  useEffect(() => {
+    const interval = setInterval(() => setPlantaoLabel(getPlantaoLabel()), 60000);
+    return () => clearInterval(interval);
+  }, []);
   // Base filtered (respects date + filters) — EXCLUDES Cancelado from all metrics
   const filtered = useMemo(() => {
     const dayStart = dateRange.from ? new Date(dateRange.from) : new Date();
@@ -92,7 +99,10 @@ export default function Dashboard() {
             {filtered.length} acionamentos
           </span>
         </h1>
-      </div>
+        <div className="ml-auto flex items-center gap-2 bg-accent/50 rounded-lg px-3 py-1.5">
+          <Shield className="h-4 w-4 text-primary" />
+          <span className="text-sm font-medium text-foreground">Plantão: <strong>{plantaoLabel}</strong></span>
+        </div>
 
       {/* Filters row — period + city side by side */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
