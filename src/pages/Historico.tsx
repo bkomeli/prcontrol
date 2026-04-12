@@ -198,6 +198,7 @@ export default function Historico() {
                 <TableHead className="text-xs">Equipe</TableHead>
                 <TableHead className="text-xs">Plantão</TableHead>
                 <TableHead className="text-xs">Hora</TableHead>
+                <TableHead className="text-xs">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

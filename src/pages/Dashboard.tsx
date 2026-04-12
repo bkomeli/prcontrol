@@ -86,8 +86,11 @@ export default function Dashboard() {
     return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
   }, [filtered]);
 
-
-
+  const byPlantao = useMemo(() => {
+    const map: Record<string, number> = {};
+    filtered.forEach((a) => { const k = a.plantao || "Sem plantão"; map[k] = (map[k] || 0) + 1; });
+    return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+  }, [filtered]);
 
   return (
     <div className="p-6 animate-fade-in">
