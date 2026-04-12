@@ -22,7 +22,7 @@ function exportCSV(data: Activation[]) {
   const headers = ["SM", "Cavalo", "Carreta", "Transportador", "Motivo", "Status", "Equipe", "Plantão", "Responsável", "Armado", "Urgente", "Sinistro", "Pacotes", "Cidade", "Observações", "Criado em"];
   const rows = data.map((a) => [
     a.sm, a.cavalo, a.carreta, a.transportador, a.motivo, a.status,
-    a.equipe || "", a.responsavel || "", a.armado, a.urgente ? "Sim" : "Não",
+    a.equipe || "", a.plantao || "", a.responsavel || "", a.armado, a.urgente ? "Sim" : "Não",
     a.sinistro ? "Sim" : "Não", String(a.pacotes || 0), a.cidade || "", a.observacoes || "",
     new Date(a.criadoEm).toLocaleString("pt-BR"),
   ]);
@@ -37,10 +37,10 @@ function exportCSV(data: Activation[]) {
 }
 
 function exportXLS(data: Activation[]) {
-  const headers = ["SM", "Cavalo", "Carreta", "Transportador", "Motivo", "Status", "Equipe", "Responsável", "Armado", "Urgente", "Sinistro", "Pacotes", "Cidade", "Observações", "Criado em"];
+  const headers = ["SM", "Cavalo", "Carreta", "Transportador", "Motivo", "Status", "Equipe", "Plantão", "Responsável", "Armado", "Urgente", "Sinistro", "Pacotes", "Cidade", "Observações", "Criado em"];
   const rows = data.map((a) => [
     a.sm, a.cavalo, a.carreta, a.transportador, a.motivo, a.status,
-    a.equipe || "", a.responsavel || "", a.armado, a.urgente ? "Sim" : "Não",
+    a.equipe || "", a.plantao || "", a.responsavel || "", a.armado, a.urgente ? "Sim" : "Não",
     a.sinistro ? "Sim" : "Não", String(a.pacotes || 0), a.cidade || "", a.observacoes || "",
     new Date(a.criadoEm).toLocaleString("pt-BR"),
   ]);
