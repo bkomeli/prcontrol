@@ -86,8 +86,11 @@ export default function Dashboard() {
     return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
   }, [filtered]);
 
-
-
+  const byPlantao = useMemo(() => {
+    const map: Record<string, number> = {};
+    filtered.forEach((a) => { const k = a.plantao || "Sem plantão"; map[k] = (map[k] || 0) + 1; });
+    return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+  }, [filtered]);
 
   return (
     <div className="p-6 animate-fade-in">
@@ -197,6 +200,22 @@ export default function Dashboard() {
                 <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} />
                 <Tooltip content={<CustomTooltip metricLabel="PRs" />} />
                 <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} animationDuration={600} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </Card>
+
+        <Card className="p-6 transition-shadow duration-200 hover:shadow-lg">
+          <h3 className="text-sm font-semibold text-foreground mb-4">PRs por Plantão</h3>
+          {byPlantao.length === 0 ? <p className="text-sm text-muted-foreground text-center py-8">Nenhuma PR encontrada para os filtros selecionados</p> : (
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={byPlantao}>
+                <XAxis dataKey="name" tick={{ fontSize: 12, fill: "hsl(var(--foreground))" }} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} />
+                <Tooltip content={<CustomTooltip metricLabel="PRs" />} />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]} animationDuration={600}>
+                  {byPlantao.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           )}

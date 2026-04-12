@@ -19,10 +19,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
 function exportCSV(data: Activation[]) {
-  const headers = ["SM", "Cavalo", "Carreta", "Transportador", "Motivo", "Status", "Equipe", "Responsável", "Armado", "Urgente", "Sinistro", "Pacotes", "Cidade", "Observações", "Criado em"];
+  const headers = ["SM", "Cavalo", "Carreta", "Transportador", "Motivo", "Status", "Equipe", "Plantão", "Responsável", "Armado", "Urgente", "Sinistro", "Pacotes", "Cidade", "Observações", "Criado em"];
   const rows = data.map((a) => [
     a.sm, a.cavalo, a.carreta, a.transportador, a.motivo, a.status,
-    a.equipe || "", a.responsavel || "", a.armado, a.urgente ? "Sim" : "Não",
+    a.equipe || "", a.plantao || "", a.responsavel || "", a.armado, a.urgente ? "Sim" : "Não",
     a.sinistro ? "Sim" : "Não", String(a.pacotes || 0), a.cidade || "", a.observacoes || "",
     new Date(a.criadoEm).toLocaleString("pt-BR"),
   ]);
@@ -37,10 +37,10 @@ function exportCSV(data: Activation[]) {
 }
 
 function exportXLS(data: Activation[]) {
-  const headers = ["SM", "Cavalo", "Carreta", "Transportador", "Motivo", "Status", "Equipe", "Responsável", "Armado", "Urgente", "Sinistro", "Pacotes", "Cidade", "Observações", "Criado em"];
+  const headers = ["SM", "Cavalo", "Carreta", "Transportador", "Motivo", "Status", "Equipe", "Plantão", "Responsável", "Armado", "Urgente", "Sinistro", "Pacotes", "Cidade", "Observações", "Criado em"];
   const rows = data.map((a) => [
     a.sm, a.cavalo, a.carreta, a.transportador, a.motivo, a.status,
-    a.equipe || "", a.responsavel || "", a.armado, a.urgente ? "Sim" : "Não",
+    a.equipe || "", a.plantao || "", a.responsavel || "", a.armado, a.urgente ? "Sim" : "Não",
     a.sinistro ? "Sim" : "Não", String(a.pacotes || 0), a.cidade || "", a.observacoes || "",
     new Date(a.criadoEm).toLocaleString("pt-BR"),
   ]);
@@ -196,6 +196,7 @@ export default function Historico() {
                 <TableHead className="text-xs">Motivo</TableHead>
                 <TableHead className="text-xs">Status</TableHead>
                 <TableHead className="text-xs">Equipe</TableHead>
+                <TableHead className="text-xs">Plantão</TableHead>
                 <TableHead className="text-xs">Hora</TableHead>
                 <TableHead className="text-xs">Ações</TableHead>
               </TableRow>
@@ -227,6 +228,7 @@ export default function Historico() {
                     <TableCell className="text-sm max-w-[200px] truncate py-3">{a.motivo}</TableCell>
                     <TableCell className="py-3"><StatusBadge status={a.status} /></TableCell>
                     <TableCell className="text-sm py-3">{a.equipe || "—"}</TableCell>
+                    <TableCell className="text-xs font-medium py-3">{a.plantao || "—"}</TableCell>
                     <TableCell className="text-xs text-muted-foreground py-3">{formatTime(a.criadoEm)}</TableCell>
                     <TableCell className="py-3" onClick={(e) => e.stopPropagation()}>
                       {a.status !== "Finalizado" && a.status !== "Cancelado" && <QuickActions activation={a} />}
