@@ -40,7 +40,7 @@ async function reverseGeocode(latLong: string): Promise<string> {
 export function NewEscoltaForm() {
   const [origem, setOrigem] = useState("");
   const [latLong, setLatLong] = useState("");
-  const [autorizadoPor, setAutorizadoPor] = useState("");
+  const [autorizadoPor, setAutorizadoPor] = useState("PGR");
   const [cidade, setCidade] = useState("");
   const [geocoding, setGeocoding] = useState(false);
   const [vehicles, setVehicles] = useState<VehicleForm[]>([emptyVehicle()]);
@@ -130,7 +130,8 @@ export function NewEscoltaForm() {
       `SM: ${v.sm}\nCavalo: ${v.placaCavalo || "—"}\nCarreta: ${v.placaCarreta || "—"}\nDestino: ${v.destino || "—"}\nTransp: ${v.transportadora || "—"}`
     ).join("\n\n");
 
-    const script = `🚛 ESCOLTA INICIADA\n\n📍 Origem: ${origem}\n\n🚗 Veículos:\n${vehicleLines}\n\n📍 Localização:\nhttps://www.google.com/maps?q=${latLong.replace(/\s/g, "")}`;
+    const mapsUrl = `https://www.google.com/maps?q=${latLong.replace(/\s/g, "")}`;
+    const script = `ESCOLTA\n\n📍 Origem: ${origem}\nLocalização: ${mapsUrl}\n\nVeículos:\n${vehicleLines}`;
 
     navigator.clipboard.writeText(script);
 
@@ -144,7 +145,7 @@ export function NewEscoltaForm() {
     // Reset
     setOrigem("");
     setLatLong("");
-    setAutorizadoPor("");
+    setAutorizadoPor("PGR");
     setCidade("");
     setVehicles([emptyVehicle()]);
     toast.success(`Escolta criada com ${vehicles.length} veículo(s)! Script copiado.`);
