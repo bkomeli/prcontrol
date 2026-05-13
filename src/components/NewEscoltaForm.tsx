@@ -40,7 +40,7 @@ async function reverseGeocode(latLong: string): Promise<string> {
 export function NewEscoltaForm() {
   const [origem, setOrigem] = useState("");
   const [latLong, setLatLong] = useState("");
-  const [autorizadoPor, setAutorizadoPor] = useState("");
+  const [autorizadoPor, setAutorizadoPor] = useState("PGR");
   const [cidade, setCidade] = useState("");
   const [geocoding, setGeocoding] = useState(false);
   const [vehicles, setVehicles] = useState<VehicleForm[]>([emptyVehicle()]);
