@@ -145,7 +145,7 @@ export function NewEscoltaForm() {
     // Reset
     setOrigem("");
     setLatLong("");
-    setAutorizadoPor("");
+    setAutorizadoPor("PGR");
     setCidade("");
     setVehicles([emptyVehicle()]);
     toast.success(`Escolta criada com ${vehicles.length} veículo(s)! Script copiado.`);
