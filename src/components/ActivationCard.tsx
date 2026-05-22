@@ -17,7 +17,7 @@ import { toast } from "sonner";
 export function ActivationCard({ activation, showQuickActions = false }: { activation: Activation; showQuickActions?: boolean }) {
   const { assignTeam, updateStatus } = useActivations();
   const { items: equipes } = useEquipes();
-  const [equipe, setEquipe] = useState<Team | "">(activation.equipe || ((activation as any).type === "escolta" ? "ATIVA" : ""));
+  const [equipe, setEquipe] = useState<Team | "">(activation.equipe || "");
   const [responsavel, setResponsavel] = useState(activation.responsavel || "");
   const [pacotes, setPacotes] = useState(String(activation.pacotes || ""));
   const [scriptOpen, setScriptOpen] = useState(false);
